@@ -29,7 +29,7 @@ CREATE TABLE public.messages (
     thread_id integer,
     user_id integer,
     message text,
-    created_at timestamp without time zone
+    created_at timestamp with time zone DEFAULT now()
 );
 
 
@@ -63,7 +63,7 @@ ALTER SEQUENCE public.messages_id_seq OWNED BY public.messages.id;
 
 CREATE TABLE public.threads (
     id integer NOT NULL,
-    created_at timestamp without time zone
+    created_at timestamp without time zone DEFAULT now()
 );
 
 
@@ -100,7 +100,7 @@ CREATE TABLE public.users (
     username text,
     password text,
     role text,
-    created_at timestamp without time zone
+    created_at timestamp without time zone DEFAULT now()
 );
 
 
