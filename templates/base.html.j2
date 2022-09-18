@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <link rel="stylesheet" href="../static/style.css" />
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+</head>
+<body>
+    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="footer">
+        {% block footer %}
+        <script src="../static/script.js"></script>
+        <div>
+            {% if username %}<a href="/">index</a> | <a href="/logout">logout</a>{% else %}<a href="/login">login</a> | <a href="/register">register</a>{% endif %}
+        </div>
+        {% endblock %}
+    </div>
+</body>
+</html>
