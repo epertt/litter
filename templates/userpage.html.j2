@@ -1,0 +1,17 @@
+{% extends "base.html.j2" %}
+{% block title %}index{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <h1>userpage</h1>
+    {% if username %}
+        <div>{{ username }}'s page</div>
+        {% for thread in threads %}
+            <div>{{ thread.username }}, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }} </div>
+        {% endfor %}
+    {% else %}
+        <div>you're not logged in :|</div>
+        <div>go to <a href="/login">login page</a> or <a href="/register">register</a></div>
+    {% endif %}
+{% endblock %}

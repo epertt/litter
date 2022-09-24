@@ -16,11 +16,22 @@ db = SQLAlchemy(app)
 @app.route("/")
 def index():
     if session.get("user_id"):
-        threads = get_user_threads()
-        username = get_username()
+        threads = get_user_threads(get_user_id())
+        username = get_username(get_user_id())
         return render_template("index.html.j2", threads=threads, username=username)
     else:
         return redirect("/error/401")
+
+
+# userpage
+@app.route("/user/<int:id>")
+def userpage(id):
+    if get_username(id):
+        threads = get_user_threads(id)
+        username = get_username(id)
+        return render_template("userpage.html.j2", threads=threads, username=username)
+    else:
+        return redirect("/error/404")
 
 
 # send message
@@ -97,21 +108,39 @@ def register_post():
 # errors
 @app.route("/error/401")
 def error_401():
-    return render_template("401.html.j2")
+    if session.get("user_id"):
+        username = get_username(get_user_id())
+        return render_template("401.html.j2", username=username)
+    else:
+        return render_template("401.html.j2")
+
+@app.route("/error/404")
+def error_404():
+    if session.get("user_id"):
+        username = get_username(get_user_id())
+        return render_template("404.html.j2", username=username)
+    else:
+        return render_template("404.html.j2")
 
 
 # helper functions
-def get_username():
-    sql = "SELECT username FROM users WHERE id = :user_id"
-    result = db.session.execute(sql, {"user_id": get_user_id()})
-    return result.first()[0]
-
-
 def get_user_id():
     return session.get("user_id", 0)
 
 
-def get_user_threads():
+def get_username(user_id):
+    sql = "SELECT username FROM users WHERE id = :user_id"
+    result = db.session.execute(sql, {"user_id": user_id})
+    if result.rowcount > 0:
+        return result.first()[0]
+    else:
+        return False
+
+
+def get_user_threads(user_id):
     sql = "SELECT U.username, M.thread_id, M.message, EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at, T.id FROM messages M, users U, threads T WHERE M.user_id = :user_id AND U.id = :user_id AND M.thread_id = T.id ORDER BY T.id DESC"
-    result = db.session.execute(sql, {"user_id": get_user_id()})
-    return result.fetchall()
+    result = db.session.execute(sql, {"user_id": user_id})
+    if result.rowcount > 0:
+        return result.fetchall()
+    else:
+        return False
