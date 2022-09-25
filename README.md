@@ -12,6 +12,9 @@ It's unlikely there will be more than the most basic features you'd expect from 
 # current state
 You can register and post messages as well as follow other users and see their messages.
 
+# demo
+Login at https://litter-tsoha.herokuapp.com/ with user / resu
+
 # todo
 * replying to other users messages
 * refactoring as needed
