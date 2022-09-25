@@ -200,6 +200,14 @@ ALTER TABLE ONLY public.messages
 
 
 --
+-- Name: watchers only_follow_once; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.watchers
+    ADD CONSTRAINT only_follow_once UNIQUE (user_id, watcher_id);
+
+
+--
 -- Name: threads threads_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
