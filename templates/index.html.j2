@@ -11,9 +11,24 @@
             <div>start thread: <input type="text" name="message"></div>
             <div><input type="submit" value="send"></div>
         </form>
-        {% for thread in threads %}
-            <div>{{ thread.username }}, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }} </div>
-        {% endfor %}
+        <div id="userthreads">
+        <h2>your threads</h2>
+            {% for thread in threads %}
+                <div><a href="/user/me">{{ thread.username }}</a>, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }}</div>
+            {% endfor %}
+        </div>
+        {% if watched %}
+            <div id="watched-user-threads">
+                <h2>following</h2>
+                {% for thread in watched %}
+                    <div><a href="/user/{{ thread.id }}">{{ thread.username }}</a>, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }}</div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div id="watched-user-threads">
+                <h2>you're not following anyone :(</h2>
+            </div>
+        {% endif %}
     {% else %}
         <div>you're not logged in :|</div>
         <div>go to <a href="/login">login page</a> or <a href="/register">register</a></div>

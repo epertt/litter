@@ -1,12 +1,15 @@
 {% extends "base.html.j2" %}
-{% block title %}index{% endblock %}
+{% block title %}{{ username }}{% endblock %}
 {% block head %}
     {{ super() }}
 {% endblock %}
 {% block content %}
-    <h1>userpage</h1>
+    <h1>{{ username }}'s page</h1>
     {% if username %}
         <div>{{ username }}'s page</div>
+        <div>follow <a href="/follow/{{ userid }}">{{ username }}</a/></div>
+        <div>unfollow <a href="/unfollow/{{ userid }}">{{ username }}</a/></div>
+        <br>
         {% for thread in threads %}
             <div>{{ thread.username }}, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }} </div>
         {% endfor %}

@@ -15,10 +15,14 @@ db = SQLAlchemy(app)
 # index
 @app.route("/")
 def index():
-    if session.get("user_id"):
-        threads = get_user_threads(get_user_id())
-        username = get_username(get_user_id())
-        return render_template("index.html.j2", threads=threads, username=username)
+    if user_id := session.get("user_id"):
+        print(user_id)
+        threads = get_user_threads(user_id)
+        username = get_username(user_id)
+        watched = get_watched_threads(user_id)
+        return render_template(
+            "index.html.j2", threads=threads, username=username, watched=watched
+        )
     else:
         return redirect("/error/401")
 
@@ -29,16 +33,43 @@ def userpage(id):
     if get_username(id):
         threads = get_user_threads(id)
         username = get_username(id)
-        return render_template("userpage.html.j2", threads=threads, username=username)
+        return render_template("userpage.html.j2", threads=threads, username=username, userid=id)
     else:
         return redirect("/error/404")
 
+# userpage
+@app.route("/follow/<int:id>")
+def follow(id):
+    if user_id := session.get("user_id"):
+        follow_id = id
+        sql = "INSERT INTO watchers (user_id, watcher_id) VALUES (:follow_id, :user_id)"
+        db.session.execute(
+            sql, {"follow_id": follow_id, "user_id": user_id}
+        )
+        db.session.commit()
+        return redirect("/")
+    else:
+        return redirect("/error/401")
+
+# userpage
+@app.route("/unfollow/<int:id>")
+def unfollow(id):
+    if user_id := session.get("user_id"):
+        follow_id = id
+        sql = "DELETE FROM watchers WHERE user_id = :follow_id AND watcher_id = :user_id"
+        db.session.execute(
+            sql, {"follow_id": follow_id, "user_id": user_id}
+        )
+        db.session.commit()
+        return redirect("/")
+    else:
+        return redirect("/error/401")
 
 # send message
 @app.route("/thread/post", methods=["POST"])
 def message_post():
-    username = get_username()
     user_id = get_user_id()
+    username = get_username(user_id)
     message = request.form["message"]
 
     sql = "INSERT INTO threads DEFAULT VALUES RETURNING id"
@@ -108,16 +139,17 @@ def register_post():
 # errors
 @app.route("/error/401")
 def error_401():
-    if session.get("user_id"):
-        username = get_username(get_user_id())
+    if user_id := session.get("user_id"):
+        username = get_username(user_id)
         return render_template("401.html.j2", username=username)
     else:
         return render_template("401.html.j2")
 
+
 @app.route("/error/404")
 def error_404():
-    if session.get("user_id"):
-        username = get_username(get_user_id())
+    if user_id := session.get("user_id"):
+        username = get_username(user_id)
         return render_template("404.html.j2", username=username)
     else:
         return render_template("404.html.j2")
@@ -138,7 +170,62 @@ def get_username(user_id):
 
 
 def get_user_threads(user_id):
-    sql = "SELECT U.username, M.thread_id, M.message, EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at, T.id FROM messages M, users U, threads T WHERE M.user_id = :user_id AND U.id = :user_id AND M.thread_id = T.id ORDER BY T.id DESC"
+
+    sql = "\
+        SELECT \
+            U.username, \
+            M.thread_id, \
+            M.message, \
+            EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at, \
+            T.id \
+        FROM \
+            messages M, \
+            users U, \
+            threads T \
+        WHERE \
+            M.user_id = :user_id \
+        AND \
+            U.id = :user_id \
+        AND \
+            M.thread_id = T.id \
+        ORDER BY \
+            T.id \
+        DESC\
+        "
+
+    result = db.session.execute(sql, {"user_id": user_id})
+    if result.rowcount >= 0:
+        return result.fetchall()
+    else:
+        return False
+
+
+def get_watched_threads(user_id):
+
+    sql = "\
+        SELECT \
+            u.id, \
+            u.username, \
+            m.message, \
+            EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at, \
+            w.watcher_id \
+        FROM \
+            users u \
+        LEFT JOIN \
+            messages m \
+        ON \
+            u.id = m.user_id \
+        LEFT JOIN \
+            watchers w \
+        ON \
+            u.id = w.user_id \
+        WHERE \
+            watcher_id = :user_id \
+        ORDER BY \
+            M.created_at \
+        DESC\
+        "
+
     result = db.session.execute(sql, {"user_id": user_id})
     if result.rowcount > 0:
         return result.fetchall()
