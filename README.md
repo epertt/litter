@@ -13,7 +13,6 @@ It's unlikely there will be more than the most basic features you'd expect from 
 You can register and post messages but can't follow or see messages sent by other users.
 
 # todo
-* following other users
 * refactoring as needed
 * css/js/etc
 * everything else
