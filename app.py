@@ -51,8 +51,9 @@ def userpage(id):
             "userpage.html.j2",
             threads=threads,
             username=username,
-            userid=id,
-            followed=followed,
+            viewed_id=id,
+            viewer_id=user_id,
+            is_followed=followed,
         )
     else:
         return redirect("/error/404")
@@ -290,8 +291,8 @@ def is_followed(user_id, watcher_id):
     sql = "SELECT user_id FROM watchers WHERE user_id = :user_id AND watcher_id = :watcher_id"
     result = db.session.execute(sql, {"user_id": user_id, "watcher_id": watcher_id})
 
-    # this can only really have either 0 (not following user) or 1 (following user) as results
-    if result.rowcount == 1:
-        return True
-    else:
+    # no rows found with matching user_id and watcher_id means watcher_id is not followind user_id 
+    if result.rowcount == 0:
         return False
+    else:
+        return True

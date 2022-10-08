@@ -21,7 +21,7 @@
         </div>
         {% if watched %}
             <div id="watched-user-threads">
-                <h2>following</h2>
+                <h2>others</h2>
                 {% for thread in watched %}
                     <div><a href="/user/{{ thread.id }}">{{ thread.username }}</a>, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }}</div>
                 {% endfor %}

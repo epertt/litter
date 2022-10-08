@@ -6,11 +6,11 @@
 {% block content %}
     <h1>{{ username }}'s page</h1>
     {% if username %}
-        <div>{{ username }}'s page</div>
-        {% if is_followed == true %}
-            <div>follow <a href="/follow/{{ userid }}">{{ username }}</a/></div>
+        {% if viewer_id == viewed_id %}
+        {% elif is_followed == false %}
+            <div><a href="/follow/{{ viewed_id }}">follow {{ username }}</a/></div>
         {% else %}
-            <div>unfollow <a href="/unfollow/{{ userid }}">{{ username }}</a/></div>
+            <div><a href="/unfollow/{{ viewed_id }}">unfollow {{ username }}</a/></div>
         {% endif %}
         <br>
         {% for thread in threads %}
