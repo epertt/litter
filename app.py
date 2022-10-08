@@ -105,14 +105,32 @@ def search_post():
     )
 
 
-@app.route("/search/results", methods=["POST"])
-def search_results(results):
-    user_id = get_user_id()
-    username = get_username(user_id)
-    return render_template("search_results.html.j2", username=username, results=results)
+#@app.route("/search/results", methods=["POST"])
+#def search_results(results):
+#    user_id = get_user_id()
+#    return render_template("search_results.html.j2", username=get_username(user_id), results=results)
 
 
 # threads
+@app.route("/thread/<int:id>")
+def thread(id):
+    user_id = get_user_id()
+    return render_template(
+        "thread.html.j2",
+        user_id=user_id,
+        username=get_username(user_id),
+        thread_messages=get_thread_messages(id),
+    )
+
+
+@app.route("/thread/reply", methods=["POST"])
+def thread_reply():
+    user_id = get_user_id()
+    reply = request.form["reply"]
+    #thread_id = request.form["thread_id"]
+    print(request.form)
+    return redirect("/thread/7")
+
 @app.route("/thread/post", methods=["POST"])
 def message_post():
     user_id = get_user_id()
@@ -253,6 +271,7 @@ def get_watched_threads(user_id):
         SELECT \
             u.id, \
             u.username, \
+            m.thread_id, \
             m.message, \
             EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at, \
             w.watcher_id \
@@ -280,6 +299,36 @@ def get_watched_threads(user_id):
         return False
 
 
+def get_thread_messages(thread_id):
+
+    sql = "\
+    SELECT \
+        u.id AS user_id, \
+        u.username, \
+        m.thread_id, \
+        m.message, \
+        EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at \
+    FROM \
+        users u \
+    LEFT JOIN \
+        messages m \
+    ON \
+        u.id = m.user_id \
+    WHERE \
+        thread_id = :thread_id \
+    ORDER BY \
+       m.created_at \
+    DESC\
+    "
+
+    result = db.session.execute(sql, {"thread_id": thread_id})
+    if result.rowcount > 0:
+        result = result.fetchall()
+        return result
+    else:
+        return False
+
+
 def search_users(search_query):
     sql = """SELECT * FROM users WHERE username LIKE '%' || :search_query || '%'"""
     result = db.session.execute(sql, {"search_query": search_query})
@@ -291,7 +340,7 @@ def is_followed(user_id, watcher_id):
     sql = "SELECT user_id FROM watchers WHERE user_id = :user_id AND watcher_id = :watcher_id"
     result = db.session.execute(sql, {"user_id": user_id, "watcher_id": watcher_id})
 
-    # no rows found with matching user_id and watcher_id means watcher_id is not followind user_id 
+    # no rows found with matching user_id and watcher_id means watcher_id is not followind user_id
     if result.rowcount == 0:
         return False
     else:

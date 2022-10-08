@@ -16,14 +16,14 @@
         <div id="userthreads">
         <h2>your threads</h2>
             {% for thread in threads %}
-                <div><a href="/user/me">{{ thread.username }}</a>, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }}</div>
+                <div><a href="/user/me">{{ thread.username }}</a>, <a href="/thread/{{ thread.thread_id }}"><time datetime="{{ thread.created_at }}"></time></a></div> </div>{{ thread.message }}</div>
             {% endfor %}
         </div>
         {% if watched %}
             <div id="watched-user-threads">
                 <h2>others</h2>
                 {% for thread in watched %}
-                    <div><a href="/user/{{ thread.id }}">{{ thread.username }}</a>, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }}</div>
+                    <div><a href="/user/{{ thread.id }}">{{ thread.username }}</a>, <a href="/thread/{{ thread.thread_id }}"><time datetime="{{ thread.created_at }}"></time></a></div></div>{{ thread.message }}</div>
                 {% endfor %}
             </div>
         {% else %}
