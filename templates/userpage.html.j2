@@ -7,8 +7,11 @@
     <h1>{{ username }}'s page</h1>
     {% if username %}
         <div>{{ username }}'s page</div>
-        <div>follow <a href="/follow/{{ userid }}">{{ username }}</a/></div>
-        <div>unfollow <a href="/unfollow/{{ userid }}">{{ username }}</a/></div>
+        {% if is_followed == true %}
+            <div>follow <a href="/follow/{{ userid }}">{{ username }}</a/></div>
+        {% else %}
+            <div>unfollow <a href="/unfollow/{{ userid }}">{{ username }}</a/></div>
+        {% endif %}
         <br>
         {% for thread in threads %}
             <div>{{ thread.username }}, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }} </div>

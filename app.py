@@ -12,7 +12,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.secret_key = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 
-# index
+# index, displays user's own threads as well as threads from anyone they are following
 @app.route("/")
 def index():
     if user_id := session.get("user_id"):
@@ -26,6 +26,7 @@ def index():
         return redirect("/error/401")
 
 
+# redirect to user's own page as seen by other users (for easier sharing)
 @app.route("/user/me")
 def ownpage():
     if user_id := session.get("user_id"):
@@ -34,20 +35,30 @@ def ownpage():
         return redirect("/error/401")
 
 
-# userpage
+# user pages
 @app.route("/user/<int:id>")
 def userpage(id):
     if get_username(id):
+        # get id of user viewing page, then use that to find out if user is followed
+        user_id = get_user_id()
+        followed = is_followed(id, user_id)
+
+        # get rest of relevant page info
         threads = get_user_threads(id)
         username = get_username(id)
+
         return render_template(
-            "userpage.html.j2", threads=threads, username=username, userid=id
+            "userpage.html.j2",
+            threads=threads,
+            username=username,
+            userid=id,
+            followed=followed,
         )
     else:
         return redirect("/error/404")
 
 
-# userpage
+# follow, unfollow -- refactor to reduce code duplication?
 @app.route("/follow/<int:id>")
 def follow(id):
     if user_id := session.get("user_id"):
@@ -63,7 +74,6 @@ def follow(id):
         return redirect("/error/401")
 
 
-# userpage
 @app.route("/unfollow/<int:id>")
 def unfollow(id):
     if user_id := session.get("user_id"):
@@ -101,7 +111,7 @@ def search_results(results):
     return render_template("search_results.html.j2", username=username, results=results)
 
 
-# send message
+# threads
 @app.route("/thread/post", methods=["POST"])
 def message_post():
     user_id = get_user_id()
@@ -205,12 +215,6 @@ def get_username(user_id):
         return False
 
 
-def search_users(search_query):
-    sql = """SELECT * FROM users WHERE username LIKE '%' || :search_query || '%'"""
-    result = db.session.execute(sql, {"search_query": search_query})
-    return result.fetchall()
-
-
 def get_user_threads(user_id):
 
     sql = "\
@@ -271,5 +275,23 @@ def get_watched_threads(user_id):
     result = db.session.execute(sql, {"user_id": user_id})
     if result.rowcount > 0:
         return result.fetchall()
+    else:
+        return False
+
+
+def search_users(search_query):
+    sql = """SELECT * FROM users WHERE username LIKE '%' || :search_query || '%'"""
+    result = db.session.execute(sql, {"search_query": search_query})
+    return result.fetchall()
+
+
+def is_followed(user_id, watcher_id):
+    # watcher_id is the user viewing the page; user_id in this case refers to the id of the user whose userpage is being viewed
+    sql = "SELECT user_id FROM watchers WHERE user_id = :user_id AND watcher_id = :watcher_id"
+    result = db.session.execute(sql, {"user_id": user_id, "watcher_id": watcher_id})
+
+    # this can only really have either 0 (not following user) or 1 (following user) as results
+    if result.rowcount == 1:
+        return True
     else:
         return False
