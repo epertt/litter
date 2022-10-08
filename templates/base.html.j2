@@ -7,7 +7,13 @@
     {% endblock %}
 </head>
 <body>
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div id="content">
+        <form action="/search/post" method="POST">
+            <div>search users (leave empty to list all): <input type="text" name="search"></div>
+        </form>
+        {% block content %}
+        {% endblock %}
+    </div>
     <div id="footer">
     <br>
         {% block footer %}

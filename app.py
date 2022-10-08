@@ -23,7 +23,7 @@ def index():
             "index.html.j2", threads=threads, username=username, watched=watched
         )
     else:
-        return redirect("/error/401")
+        return redirect("/login")
 
 
 # redirect to user's own page as seen by other users (for easier sharing)
@@ -104,13 +104,6 @@ def search_post():
         results=search_users(search_query),
     )
 
-
-#@app.route("/search/results", methods=["POST"])
-#def search_results(results):
-#    user_id = get_user_id()
-#    return render_template("search_results.html.j2", username=get_username(user_id), results=results)
-
-
 # threads
 @app.route("/thread/<int:id>")
 def thread(id):
@@ -121,15 +114,6 @@ def thread(id):
         username=get_username(user_id),
         thread_messages=get_thread_messages(id),
     )
-
-
-@app.route("/thread/reply", methods=["POST"])
-def thread_reply():
-    user_id = get_user_id()
-    reply = request.form["reply"]
-    #thread_id = request.form["thread_id"]
-    print(request.form)
-    return redirect("/thread/7")
 
 @app.route("/thread/post", methods=["POST"])
 def message_post():
@@ -150,6 +134,21 @@ def message_post():
     db.session.commit()
     return redirect("/")
 
+@app.route("/thread/reply", methods=["POST"])
+def thread_reply():
+    user_id = get_user_id()
+    reply = request.form["reply"]
+    thread_id = request.form["thread_id"]
+
+    sql = "INSERT INTO messages (thread_id, user_id, message) VALUES (:thread_id, :user_id, :message)"
+    db.session.execute(
+        sql, {"thread_id": thread_id, "user_id": user_id, "message": reply}
+    )
+    db.session.commit()
+
+    print(user_id, thread_id, reply)
+
+    return redirect(f"/thread/{thread_id}")
 
 # login, logout
 @app.route("/login")
@@ -239,8 +238,10 @@ def get_user_threads(user_id):
     sql = "\
         SELECT \
             U.username, \
+            M.user_id, \
             M.thread_id, \
             M.message, \
+            M.type, \
             EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at, \
             T.id \
         FROM \
@@ -273,6 +274,7 @@ def get_watched_threads(user_id):
             u.username, \
             m.thread_id, \
             m.message, \
+            m.type, \
             EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at, \
             w.watcher_id \
         FROM \
@@ -318,7 +320,7 @@ def get_thread_messages(thread_id):
         thread_id = :thread_id \
     ORDER BY \
        m.created_at \
-    DESC\
+    ASC\
     "
 
     result = db.session.execute(sql, {"thread_id": thread_id})
