@@ -4,12 +4,14 @@
     {{ super() }}
 {% endblock %}
 {% block content %}
+    <form action="/search/post" method="POST">
+        <div>search users (leave empty to list all): <input type="text" name="search"></div>
+    </form>
     <h1>index</h1>
     {% if username %}
         <div>hello {{ username }}</div>
         <form action="/thread/post" method="POST">
             <div>start thread: <input type="text" name="message"></div>
-            <div><input type="submit" value="send"></div>
         </form>
         <div id="userthreads">
         <h2>your threads</h2>

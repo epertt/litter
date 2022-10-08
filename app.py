@@ -16,7 +16,6 @@ db = SQLAlchemy(app)
 @app.route("/")
 def index():
     if user_id := session.get("user_id"):
-        print(user_id)
         threads = get_user_threads(user_id)
         username = get_username(user_id)
         watched = get_watched_threads(user_id)
@@ -27,43 +26,80 @@ def index():
         return redirect("/error/401")
 
 
+@app.route("/user/me")
+def ownpage():
+    if user_id := session.get("user_id"):
+        return redirect(f"/user/{user_id}")
+    else:
+        return redirect("/error/401")
+
+
 # userpage
 @app.route("/user/<int:id>")
 def userpage(id):
     if get_username(id):
         threads = get_user_threads(id)
         username = get_username(id)
-        return render_template("userpage.html.j2", threads=threads, username=username, userid=id)
+        return render_template(
+            "userpage.html.j2", threads=threads, username=username, userid=id
+        )
     else:
         return redirect("/error/404")
+
 
 # userpage
 @app.route("/follow/<int:id>")
 def follow(id):
     if user_id := session.get("user_id"):
-        follow_id = id
-        sql = "INSERT INTO watchers (user_id, watcher_id) VALUES (:follow_id, :user_id)"
-        db.session.execute(
-            sql, {"follow_id": follow_id, "user_id": user_id}
-        )
-        db.session.commit()
-        return redirect("/")
+        if id == user_id:
+            return redirect("/error/400")
+        else:
+            follow_id = id
+            sql = "INSERT INTO watchers (user_id, watcher_id) VALUES (:follow_id, :user_id)"
+            db.session.execute(sql, {"follow_id": follow_id, "user_id": user_id})
+            db.session.commit()
+            return redirect("/")
     else:
         return redirect("/error/401")
+
 
 # userpage
 @app.route("/unfollow/<int:id>")
 def unfollow(id):
     if user_id := session.get("user_id"):
-        follow_id = id
-        sql = "DELETE FROM watchers WHERE user_id = :follow_id AND watcher_id = :user_id"
-        db.session.execute(
-            sql, {"follow_id": follow_id, "user_id": user_id}
-        )
-        db.session.commit()
-        return redirect("/")
+        if id == user_id:
+            return redirect("/error/400")
+        else:
+            follow_id = id
+            sql = "DELETE FROM watchers WHERE user_id = :follow_id AND watcher_id = :user_id"
+            db.session.execute(sql, {"follow_id": follow_id, "user_id": user_id})
+            db.session.commit()
+            return redirect("/")
     else:
         return redirect("/error/401")
+
+
+# search
+@app.route("/search/post", methods=["POST"])
+def search_post():
+    user_id = get_user_id()
+    username = get_username(user_id)
+    search_query = request.form["search"]
+
+    return render_template(
+        "search_results.html.j2",
+        username=username,
+        query=search_query,
+        results=search_users(search_query),
+    )
+
+
+@app.route("/search/results", methods=["POST"])
+def search_results(results):
+    user_id = get_user_id()
+    username = get_username(user_id)
+    return render_template("search_results.html.j2", username=username, results=results)
+
 
 # send message
 @app.route("/thread/post", methods=["POST"])
@@ -167,6 +203,12 @@ def get_username(user_id):
         return result.first()[0]
     else:
         return False
+
+
+def search_users(search_query):
+    sql = """SELECT * FROM users WHERE username LIKE '%' || :search_query || '%'"""
+    result = db.session.execute(sql, {"search_query": search_query})
+    return result.fetchall()
 
 
 def get_user_threads(user_id):

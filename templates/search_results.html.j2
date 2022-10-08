@@ -1,0 +1,20 @@
+{% extends "base.html.j2" %}
+{% block title %}{{ username }}{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    {% if query == "" %}
+        <h1>list of users</h1>
+    {% else %}
+        <h1>users matching "{{ query }}"</h1>
+    {% endif %}
+    {% if username %}
+        {% for result in results %}
+            <div><a href="/user/{{ result.id }}">{{ result.username }}<a></div>
+        {% endfor %}
+    {% else %}
+        <div>you're not logged in :|</div>
+        <div>go to <a href="/login">login page</a> or <a href="/register">register</a></div>
+    {% endif %}
+{% endblock %}
