@@ -29,7 +29,8 @@ CREATE TABLE public.messages (
     thread_id integer,
     user_id integer,
     message text,
-    created_at timestamp with time zone DEFAULT now()
+    created_at timestamp with time zone DEFAULT now(),
+    type text
 );
 
 

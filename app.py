@@ -46,12 +46,13 @@ def userpage(id):
 
         # get rest of relevant page info
         threads = get_user_threads(id)
-        username = get_username(id)
+        username = get_username(user_id)
 
         return render_template(
             "userpage.html.j2",
             threads=threads,
             username=username,
+            viewed_username=get_username(id),
             viewed_id=id,
             viewer_id=user_id,
             is_followed=followed,
@@ -130,9 +131,9 @@ def message_post():
 
     thread_id = result.first()[0]
 
-    sql = "INSERT INTO messages (thread_id, user_id, message) VALUES (:thread_id, :user_id, :message)"
+    sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
     db.session.execute(
-        sql, {"thread_id": thread_id, "user_id": user_id, "message": message}
+        sql, {"thread_id": thread_id, "user_id": user_id, "message": message, "type": "thread"}
     )
     db.session.commit()
     return redirect("/")
@@ -144,9 +145,9 @@ def thread_reply():
     reply = request.form["reply"]
     thread_id = request.form["thread_id"]
 
-    sql = "INSERT INTO messages (thread_id, user_id, message) VALUES (:thread_id, :user_id, :message)"
+    sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
     db.session.execute(
-        sql, {"thread_id": thread_id, "user_id": user_id, "message": reply}
+        sql, {"thread_id": thread_id, "user_id": user_id, "message": reply, "type": "reply"}
     )
     db.session.commit()
 
