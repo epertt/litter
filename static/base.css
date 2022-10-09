@@ -1,0 +1,68 @@
+:root {
+	--main-bg-color-hs: 229, 16%;
+	--main-bg-color-l: 20%;
+	--main-bg-color: hsl(var(--main-bg-color-hs), var(--main-bg-color-l));
+
+	--main-text-color-hs: 225, 15%;
+	--main-text-color-l: 95%;
+	--main-text-color: hsl(var(--main-text-color-hs), var(--main-text-color-l));
+
+	--main-link-color-hs: 212, 76%;
+	--main-link-color-l: 90%;
+	--main-link-color: hsl(var(--main-link-color-hs), var(--main-link-color-l));
+
+	--link-normal: hsl(var(--main-link-color-hs), 80%);
+	--link-visited: hsl(var(--main-link-color-hs), 70%);
+	--link-hover: hsl(var(--main-link-color-hs), 60%);
+
+	--base-margin: 0.7em;
+	--base-padding: 0.7em;
+
+	--top-height: 2em;
+
+	--base-rounding: 4px;
+
+    --thick-border-width: 3px;
+}
+
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	padding: 0;
+	margin: 0;
+}
+
+html,
+body {
+	height: 100%;
+}
+
+html {
+	background-color: var(--main-bg-color);
+	color: var(--main-text-color);
+}
+
+a {
+	color: var(--link-normal);
+    text-decoration: none;
+}
+
+a:visited {
+	color: var(--link-normal);
+}
+
+a:hover {
+	color: var(--link-visited);
+}
+
+input:active,
+input:focus {
+	border: none;
+	box-shadow: none ;
+	outline: none;
+}

@@ -1,6 +1,7 @@
 import os
+import json
 from flask import Flask
-from flask import redirect, render_template, request, session
+from flask import redirect, render_template, request, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
@@ -59,7 +60,7 @@ def userpage(id):
         return redirect("/error/404")
 
 
-# follow, unfollow -- refactor to reduce code duplication?
+# follow, unfollow -- redo this
 @app.route("/follow/<int:id>")
 def follow(id):
     if user_id := session.get("user_id"):
@@ -95,14 +96,15 @@ def unfollow(id):
 def search_post():
     user_id = get_user_id()
     username = get_username(user_id)
-    search_query = request.form["search"]
+    search_query = request.json["search"]
+    results = search_users(search_query)
+    data = []
 
-    return render_template(
-        "search_results.html.j2",
-        username=username,
-        query=search_query,
-        results=search_users(search_query),
-    )
+    for result in results:
+        data.append(result[0])
+
+    return jsonify(data)
+
 
 # threads
 @app.route("/thread/<int:id>")
@@ -114,6 +116,7 @@ def thread(id):
         username=get_username(user_id),
         thread_messages=get_thread_messages(id),
     )
+
 
 @app.route("/thread/post", methods=["POST"])
 def message_post():
@@ -134,6 +137,7 @@ def message_post():
     db.session.commit()
     return redirect("/")
 
+
 @app.route("/thread/reply", methods=["POST"])
 def thread_reply():
     user_id = get_user_id()
@@ -146,9 +150,8 @@ def thread_reply():
     )
     db.session.commit()
 
-    print(user_id, thread_id, reply)
-
     return redirect(f"/thread/{thread_id}")
+
 
 # login, logout
 @app.route("/login")
@@ -305,10 +308,11 @@ def get_thread_messages(thread_id):
 
     sql = "\
     SELECT \
-        u.id AS user_id, \
+        u.id, \
         u.username, \
         m.thread_id, \
         m.message, \
+        m.type, \
         EXTRACT(EPOCH FROM M.created_at)::INTEGER AS created_at \
     FROM \
         users u \
@@ -332,10 +336,9 @@ def get_thread_messages(thread_id):
 
 
 def search_users(search_query):
-    sql = """SELECT * FROM users WHERE username LIKE '%' || :search_query || '%'"""
+    sql = """SELECT row_to_json(r.*) FROM (SELECT id, username, (EXTRACT(EPOCH FROM created_at)::INTEGER) AS created_at FROM users WHERE username LIKE '%' || :search_query || '%') r ORDER BY created_at DESC"""
     result = db.session.execute(sql, {"search_query": search_query})
     return result.fetchall()
-
 
 def is_followed(user_id, watcher_id):
     # watcher_id is the user viewing the page; user_id in this case refers to the id of the user whose userpage is being viewed

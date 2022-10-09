@@ -1,57 +1,38 @@
 {% extends "base.html.j2" %}
 {% block title %}index{% endblock %}
 {% block head %}
-    {{ super() }}
+{{ super() }}
 {% endblock %}
 {% block content %}
-    <h1>your page</h1>
-    {% if username %}
-		<div id="start-thread">
-			<div>hello {{ username }}</div>
-			<form action="/thread/post" method="POST">
-				<div>start thread: <input type="text" name="message"></div>
-			</form>
+<div id="content">
+	{% if username %}
+	<div id="userthreads" class="content-block">
+		<form id="start-thread" class="content-block-form" action="/thread/post" method="POST">
+			<input type="text" name="message" placeholder="start thread" autofocus>
+		</form>
+		<div class="thread-container">
+			{% for thread in threads %}
+			{% include 'threads-partial.html.j2' %}
+			{% endfor %}
 		</div>
-
-        <div id="userthreads">
-        <h2>your threads</h2>
-            {% for thread in threads %}
-				{% if thread.type == "thread"%}
-                	<div>
-						<div>
-						<a href="/user/me">{{ thread.username }}</a>, 
-						<a href="/thread/{{ thread.thread_id }}">
-							<time datetime="{{ thread.created_at }}"></time>
-						</a>
-						</div>
-						{{ thread.message }}
-					</div>
-				{% endif %}
-            {% endfor %}
-        </div>
-
-        {% if watched %}
-            <div id="watched-user-threads">
-                <h2>others</h2>
-                {% for thread in watched %}
-                    <div>
-						<div>
-							<a href="/user/{{ thread.id }}">{{ thread.username }}</a>, 
-							<a href="/thread/{{ thread.thread_id }}">
-								<time datetime="{{ thread.created_at }}"></time>
-							</a>
-						</div>
-						{{ thread.message }}
-					</div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div id="watched-user-threads">
-                <h2>you're not following anyone :(</h2>
-            </div>
-        {% endif %}
-    {% else %}
-        <div>you're not logged in :|</div>
-        <div>go to <a href="/login">login page</a> or <a href="/register">register</a></div>
-    {% endif %}
+	</div>
+	<div id="watched-user-threads" class="content-block">
+		<form id="search-followed" class="content-block-form" action="/foo" method="POST">
+			<input type="text" name="message" placeholder="filter messages from followed users (not implemented)">
+		</form>
+		<div class="thread-container">
+			{% for thread in watched %}
+			{% include 'threads-partial.html.j2' %}
+			{% endfor %}
+		</div>
+	</div>
+	<div id="search-results" class="content-block">
+		<div id="search-form" class="content-block-form">
+			<input type="text" name="search" id="search" placeholder="search users (leave empty to list all)">
+		</div>
+		<div id="search-container">
+		</div>
+	</div>
+</div>
+{% endif %}
 {% endblock %}

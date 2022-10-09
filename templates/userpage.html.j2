@@ -1,26 +1,26 @@
 {% extends "base.html.j2" %}
 {% block title %}{{ username }}{% endblock %}
 {% block head %}
-    {{ super() }}
+{{ super() }}
 {% endblock %}
 {% block content %}
-    <h1>{{ username }}'s page</h1>
+<div id="content-userpage">
+    <!--<h1>{{ username }}'s page</h1>-->
     {% if username %}
-        {% if viewer_id == viewed_id %}
-        {% elif is_followed == false %}
-            <div><a href="/follow/{{ viewed_id }}">follow {{ username }}</a/></div>
-        {% else %}
-            <div><a href="/unfollow/{{ viewed_id }}">unfollow {{ username }}</a/></div>
-        {% endif %}
-        <br>
-        {% for thread in threads %}
-            <!--<div>{{ thread.username }}, <time datetime="{{ thread.created_at }}"></time></div> </div>{{ thread.message }}</div>-->
-            {% if thread.type == "thread"%}
-                <div><a href="/user/{{ thread.user_id }}">{{ thread.username }}</a>, <a href="/thread/{{ thread.thread_id }}"><time datetime="{{ thread.created_at }}"></time></a></div></div>{{ thread.message }}</div>
-            {% endif %}
-        {% endfor %}
+    {% if viewer_id == viewed_id %}
+    {% elif is_followed == false %}
+    <div><a href="/follow/{{ viewed_id }}">follow {{ username }}</a /></div>
     {% else %}
-        <div>you're not logged in :|</div>
-        <div>go to <a href="/login">login page</a> or <a href="/register">register</a></div>
+    <div><a href="/unfollow/{{ viewed_id }}">unfollow {{ username }}</a /></div>
     {% endif %}
+    <div id="userthreads" class="content-block">
+        <div class="thread-container">
+            {% for thread in threads %}
+            {% include 'threads-partial.html.j2' %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
 {% endblock %}

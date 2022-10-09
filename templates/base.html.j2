@@ -1,27 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     {% block head %}
     <link rel="stylesheet" href="../static/style.css" />
     <title>{% block title %}{% endblock %}</title>
     {% endblock %}
 </head>
+
 <body>
-    <div id="content">
-        <form action="/search/post" method="POST">
-            <div>search users (leave empty to list all): <input type="text" name="search"></div>
-        </form>
+    <div id="top-bar">
+        {% if username %}
+        <div id="top-menu">
+            <a href="/">index</a> | <a href="/logout">logout</a> | <span>hello {{ username }}</span>
+        </div>
+        {% else %}
+        <div id="top-menu">
+            <a href="/login">login</a> | <a href="/register">register</a>
+        </div>
+        {% endif %}
+    </div>
         {% block content %}
         {% endblock %}
-    </div>
     <div id="footer">
-    <br>
         {% block footer %}
+        <!--{% if not username %}
+            {% include 'login_please.html.j2' %}
+        {% endif %}-->
         <script src="../static/script.js"></script>
-        <div>
-            {% if username %}<a href="/">index</a> | <a href="/logout">logout</a>{% else %}<a href="/login">login</a> | <a href="/register">register</a>{% endif %}
-        </div>
         {% endblock %}
     </div>
 </body>
+
 </html>

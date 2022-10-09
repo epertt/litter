@@ -1,23 +1,27 @@
 {% extends "base.html.j2" %}
 {% block title %}{{ username }}{% endblock %}
 {% block head %}
-    {{ super() }}
+{{ super() }}
 {% endblock %}
 {% block content %}
-    {% if username %}
-        <h1>thread {{ thread_messages[0].thread_id }}</h1>
-        <form action="/thread/reply" method="POST">
-            <div>reply to thread:
-                <input type="text" name="reply" required>
-                <input type="hidden" name="thread_id" value="{{ thread_messages[0].thread_id }}" required readonly>
-            </div>
+{% if username %}
+<div id="content-thread">
+    <div id="userthreads" class="content-block thread-full">
+        {% set is_thread = true %}
+        <div class="thread-container">
+            {% for thread in thread_messages %}
+            {% include 'threads-partial.html.j2' %}
+            {% endfor %}
+        </div>
+        <form id="reply-thread" class="content-block-form" action="/thread/reply" method="POST">
+            <input type="text" name="reply" placeholder="reply to thread">
+            <input type="hidden" name="thread_id" value="{{ thread_messages[0].thread_id }}" required readonly>
         </form>
-        <br>
-        {% for message in thread_messages %}
-            <div><a href="/user/{{ message.user_id }}">{{ message.username }}</a>, <a href="/thread/{{ message.thread_id }}"><time datetime="{{ message.created_at }}"></time></a></div> </div>{{ message.message }}</div>
-        {% endfor %}
-    {% else %}
-        <div>you're not logged in :|</div>
-        <div>go to <a href="/login">login page</a> or <a href="/register">register</a></div>
-    {% endif %}
+    </div>
+</div>
+{% endif %}
 {% endblock %}
+
+<!-- 
+<div><a href="/user/{{ message.user_id }}">{{ message.username }}</a>, <a href="/thread/{{ message.thread_id }}"><time datetime="{{ message.created_at }}"></time></a></div> </div>{{ message.message }}</div>
+-->
