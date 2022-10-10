@@ -4,9 +4,7 @@
 {{ super() }}
 {% endblock %}
 {% block content %}
-<div id="content-userpage">
-    <!--<h1>{{ username }}'s page</h1>-->
-    {% if username %}
+<div class="content userpage center-grid">
     {% if viewer_id == viewed_id %}
     {% elif is_followed == false %}
     <div><a href="/follow/{{ viewed_id }}">follow {{ viewed_username }}</a /></div>
@@ -24,7 +22,6 @@
             {% endif %}
         </div>
     </div>
-    {% endif %}
 </div>
 
 {% endblock %}

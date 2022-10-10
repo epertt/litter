@@ -1,4 +1,4 @@
-#content {
+.content {
 	max-height: calc(
 		100vh -
 			(var(--top-height) + var(--base-padding) * 4 + var(--base-margin) * 2)
@@ -22,13 +22,26 @@
     scrollbar-width: none;
 }
 
+#search-container {
+	transform: scaleY(0);    
+	transform-origin: top;
+	transition: transform 0.26s ease;
+}
+
+#search-results {
+	background-color: transparent;
+}
+
 .list-item {
 	background-color: hsl(var(--main-bg-color-hs), 17.5%);
 	padding: calc(var(--base-padding) / 2) var(--base-padding)
 		calc(var(--base-padding) / 2) var(--base-padding);
-	/*max-width: calc(400px - var(--base-padding) * 2);*/
 	word-break: break-all;
 	cursor: pointer;
+}
+
+.new-item {
+	animation: add-div .3s linear;
 }
 
 .list-item:hover {
@@ -51,35 +64,27 @@
 	float: left;
 }
 
-#content, #content-thread, #content-userpage {
-	display: grid;
-	justify-content: start;
-	align-content: stretch;
-	justify-items: start;
-	align-items: start;
-	gap: calc(var(--base-margin) * 3);
-	margin: var(--base-margin);
-}
-
-#content-userpage > #userthreads > .thread-container {
+.userpage > #userthreads > .thread-container {
     margin-top: 0;
 }
 
-#content {
-    grid-template-columns: repeat(auto-fill, 400px);
+.content {
+	display: grid;
+	grid-template-columns: 1fr 1fr 1fr;
+	gap: calc(var(--base-margin) * 3);
+	margin: var(--base-margin) calc(3 * var(--base-margin)) var(--base-margin) var(--base-margin);
 }
 
-#content-thread {
+.threadpage {
     grid-template-columns: repeat(auto-fill, 800px);
-    justify-content: center;
-	align-content: center;
-	justify-items: center;
-	align-items: center;
 }
 
-#content-userpage {
+.userpage {
     grid-template-columns: 600px;
-    justify-content: center;
+}
+
+.center-grid {
+	justify-content: center;
 	align-content: center;
 	justify-items: center;
 	align-items: center;
@@ -107,7 +112,7 @@
 .content-block {
 	background-color: hsl(var(--main-bg-color-hs), 15%);
 	padding: var(--base-padding);
-	height: auto;
+	height: fit-content;
 	border-radius: var(--base-rounding);
     max-height: inherit;
     overflow: auto;
@@ -133,6 +138,10 @@
 	background-color: var(--main-bg-color);
 	color: var(--main-text-color);
 	border-radius: var(--base-rounding);
+}
+
+input:hover {
+	background-color: rgba(0,0,0,0.1);
 }
 
 .timeago {

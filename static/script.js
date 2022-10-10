@@ -32,54 +32,114 @@ function updateTimes() {
 	});
 }
 
-// search users
+// handle form input etc
 
 window.addEventListener("load", () => {
-	const searchForm = document.querySelector("#search");
+	// remove this if you figure it out in css
+	document.querySelector("#userthreads").children[1].children.length == 0
+		? (document.querySelector("#userthreads").style.backgroundColor =
+				"transparent")
+		: () => {};
+	document.querySelector("#watched-user-threads").children[1].children.length ==
+	0
+		? (document.querySelector("#watched-user-threads").style.backgroundColor =
+				"transparent")
+		: () => {};
+
+	const searchForm = document.querySelector("#search-form").children[0];
 	const searchContainer = document.querySelector("#search-container");
 
-	async function doSearch(search) {
-		var url = "/search/post";
+	const searchFollowedForm =
+		document.querySelector("#search-followed").children[0];
 
+	const threadForm = document.querySelector("#start-thread").children[0];
+	const threadContainer = document.querySelector("#thread-container");
+
+	async function handleForm(input, url) {
 		const response = await fetch(url, {
 			method: "POST",
-			body: JSON.stringify(search),
+			body: JSON.stringify(input),
 			headers: {
 				"Content-Type": "application/json",
 			},
 		});
 
-		Object.entries(await response.json()).forEach(([key, value]) => {
-			const newSearchResultElement = document.createElement("div");
-			newSearchResultElement.className = "list-item search-result";
-
-			const newSearchResultElementUser = document.createElement("a");
-			newSearchResultElementUser.href = "/user/" + value["id"];
-			newSearchResultElementUser.innerHTML = value["username"];
-			newSearchResultElement.appendChild(newSearchResultElementUser);
-
-			const newSearchResultElementCreatedAt = document.createElement("time");
-			newSearchResultElementCreatedAt.className = "timeago account_registered";
-			newSearchResultElementCreatedAt.dateTime = value["created_at"];
-			newSearchResultElement.appendChild(newSearchResultElementCreatedAt);
-
-			searchContainer.appendChild(newSearchResultElement);
-
-			// update "x [time] ago"
-			updateTimes();
-		});
+		switch (url) {
+			case "/search/post":
+				updateSearchContainer(response, searchContainer);
+				break;
+			case "/thread/post":
+				console.log("hmm");
+				break;
+			//updateThreadContainer(response, threadContainer);
+		}
 	}
 
 	if (searchForm) {
 		searchForm.addEventListener("keypress", function (e) {
 			if (e.key === "Enter") {
 				e.preventDefault();
-				doSearch({ search: searchForm.value });
+				handleForm({ search: searchForm.value }, "/search/post");
 				// clear search form
 				searchForm.value = "";
 				// clear search results
 				searchContainer.replaceChildren();
+				searchContainer.style.transform = "scaleY(1)";
+			}
+		});
+	}
+	if (threadForm) {
+		threadForm.addEventListener("keypress", function (e) {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				if (threadForm.value.length == 0) {
+					alert("threads or replies can't be empty");
+					threadForm.value = "";
+					return;
+				}
+				handleForm({ message: threadForm.value }, "/thread/post");
+				// clear thread form
+				threadForm.value = "";
+			}
+		});
+	}
+	if (searchFollowedForm) {
+		searchFollowedForm.addEventListener("keypress", function (e) {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				alert("not implemented yet");
+				searchFollowedForm.value = "";
+				return;
 			}
 		});
 	}
 });
+
+async function updateSearchContainer(response, container) {
+	const timeout = (ms) => new Promise((r) => setTimeout(r, ms));
+	document.querySelector("#search-results").style.backgroundColor =
+		"hsl(var(--main-bg-color-hs), 15%)";
+
+	for (const user of await response.json()) {
+		const newSearchResultElement = document.createElement("div");
+		newSearchResultElement.className = "list-item search-result new-item";
+
+		const newSearchResultElementUser = document.createElement("a");
+		newSearchResultElementUser.href = "/user/" + user.id;
+		newSearchResultElementUser.innerHTML = user.username;
+		newSearchResultElement.appendChild(newSearchResultElementUser);
+
+		const newSearchResultElementCreatedAt = document.createElement("time");
+		newSearchResultElementCreatedAt.className = "timeago account_registered";
+		newSearchResultElementCreatedAt.dateTime = user.created_at;
+		newSearchResultElement.appendChild(newSearchResultElementCreatedAt);
+
+		container.appendChild(newSearchResultElement);
+
+		// update "x [time] ago"
+		updateTimes();
+
+		// for style
+		await timeout(50);
+	}
+}

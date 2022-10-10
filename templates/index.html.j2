@@ -4,8 +4,7 @@
 {{ super() }}
 {% endblock %}
 {% block content %}
-<div id="content">
-	{% if username %}
+<div class="content">
 	<div id="userthreads" class="content-block">
 		<form id="start-thread" class="content-block-form" action="/thread/post" method="POST">
 			<input type="text" name="message" placeholder="start thread" autofocus>
@@ -21,9 +20,11 @@
 			<input type="text" name="message" placeholder="filter messages from followed users (not implemented)">
 		</form>
 		<div class="thread-container">
+			{% if watched %}
 			{% for thread in watched %}
 			{% include 'threads-partial.html.j2' %}
 			{% endfor %}
+			{% endif %}
 		</div>
 	</div>
 	<div id="search-results" class="content-block">
@@ -34,5 +35,4 @@
 		</div>
 	</div>
 </div>
-{% endif %}
 {% endblock %}

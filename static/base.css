@@ -47,6 +47,10 @@ html {
 	color: var(--main-text-color);
 }
 
+body {
+
+}
+
 a {
 	color: var(--link-normal);
     text-decoration: none;

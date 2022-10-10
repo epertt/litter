@@ -1,27 +1,9 @@
-{% if thread.type == "thread" or is_thread %}
-    {% if is_thread %}
-        {% if thread.type == "thread" %}
-            <div class="list-item thread thread-opening" style="cursor:auto;">
-        {% else %}
-            <div class="list-item thread" style="cursor:auto;">
-        {%endif %}
-            <div>
-                <a href="/user/{{ thread.id }}">{{ thread.username }}</a>
-                <span class="timeago" href="/thread/{{ thread.thread_id }}">
-                    <time datetime="{{ thread.created_at }}"></time>
-                </span>
-            </div>
-            <span class="message">{{ thread.message }}</span>
-        </div>
-    {% else %}
-        <div onclick="location.href='/thread/{{ thread.thread_id }}';" class="list-item thread">
-            <div>
-                <a href="/user/{{ thread.id }}">{{ thread.username }}</a>
-                <a class="timeago" href="/thread/{{ thread.thread_id }}">
-                    <time datetime="{{ thread.created_at }}"></time>
-                </a>
-            </div>
-            <span class="message">{{ thread.message }}</span>
-        </div>
-    {% endif %}
-{% endif %}
+<div {% if thread.type=='thread' and not is_thread %} onclick="location.href='/thread/{{ thread.thread_id }}';" {% endif %} class="list-item thread {% if thread.type=='thread' and is_thread %}thread-opening{% endif %}" style="cursor:{% if thread.type=='thread' and is_thread %}auto{% else %}pointer{% endif %};">
+    <div>
+        <a href="/user/{{ thread.uid }}">{{ thread.username }}</a>
+        <span class="timeago" href="/thread/{{ thread.thread_id }}">
+            <time datetime="{{ thread.created_at }}"></time>
+        </span>
+    </div>
+    <span class="message">{{ thread.message }}</span>
+</div>
