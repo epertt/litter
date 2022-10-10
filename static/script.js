@@ -122,11 +122,12 @@ async function updateSearchContainer(response, container, howmany) {
 
 		console.log(user);
 
-		const newSearchResultElement = document.createElement("div");
+		const newSearchResultElement = document.createElement("a");
+		newSearchResultElement.href = "/user/" + user.id;
 		newSearchResultElement.className = "list-item search-result new-item";
 
-		const newSearchResultElementUser = document.createElement("a");
-		newSearchResultElementUser.href = "/user/" + user.id;
+		const newSearchResultElementUser = document.createElement("span");
+		//newSearchResultElementUser.href = "/user/" + user.id;
 		newSearchResultElementUser.innerHTML = user.username;
 		newSearchResultElement.appendChild(newSearchResultElementUser);
 

@@ -4,10 +4,15 @@
     {{ super() }}
 {% endblock %}
 {% block content %}
-    <h1>register</h1>
-    <form action="/register/post" method="POST">
-        <div>username: <input type="text" name="username"></div>
-        <div>password: <input type="password" name="password"></div>
-        <div><input type="submit" value="send"></div>
-    </form>
+<!-- reusing login page because :lazy: -->
+<div class="content loginpage center-grid">
+    <div id="login">
+        <h1 id="register-login-header">register</h1>
+        <form id="login-form" class="content-block-form" action="/register/post" method="POST">
+            <input type="text" name="username" placeholder="username">
+            <input type="password" name="password" placeholder="password">
+            <input type="submit" value="send" style="display:none;">
+        </form>
+    </div>
+</div>
 {% endblock %}

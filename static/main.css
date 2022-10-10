@@ -103,7 +103,7 @@
 	margin: calc(2 * var(--base-margin)) calc(2 * var(--base-margin));
 }
 
-#header-container {
+#header-container, #register-login-header {
 	grid-area: header-container;
 	width: 100%;
 	text-align: center;
@@ -111,6 +111,13 @@
 	margin: calc(2 * var(--base-margin)) 0 0 0;
 	background-color: var(--main-bg-color-darker-1);
 	border-radius: var(--base-rounding);
+}
+
+#register-login-header {
+	grid-area: unset;
+	width: calc(100% - var(--base-margin) - var(--thick-border-width));
+	padding: var(--base-padding);
+	margin: 10px 0;
 }
 
 .userpage,
