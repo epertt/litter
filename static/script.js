@@ -35,17 +35,6 @@ function updateTimes() {
 // handle form input etc
 
 window.addEventListener("load", () => {
-	// remove this if you figure it out in css
-	document.querySelector("#userthreads").children[2].children.length == 0
-		? (document.querySelector("#userthreads").style.backgroundColor =
-				"transparent")
-		: () => {};
-	document.querySelector("#watched-user-threads").children[2].children.length ==
-	0
-		? (document.querySelector("#watched-user-threads").style.backgroundColor =
-				"transparent")
-		: () => {};
-
 	const searchForm = document.querySelector("#search-form").children[0];
 	const searchContainer = document.querySelector("#search-container");
 
