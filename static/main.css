@@ -17,23 +17,24 @@
 	grid-template-rows: repeat(auto-fit, minmax(1em, auto));
 	gap: var(--base-margin);
 	margin-top: calc(var(--base-margin) - 3px);
-    max-height: inherit;
-    overflow: auto;
-    scrollbar-width: none;
+	max-height: inherit;
+	overflow: auto;
+	scrollbar-width: none;
 }
 
 #search-container {
-	transform: scaleY(0);    
+	transform: scaleY(0);
 	transform-origin: top;
 	transition: transform 0.26s ease;
 }
 
 #search-results {
 	background-color: transparent;
+	overflow: auto;
 }
 
 .list-item {
-	background-color: hsl(var(--main-bg-color-hs), 17.5%);
+	background-color: var(--main-bg-color-darker-1);
 	padding: calc(var(--base-padding) / 2) var(--base-padding)
 		calc(var(--base-padding) / 2) var(--base-padding);
 	word-break: break-all;
@@ -41,15 +42,15 @@
 }
 
 .new-item {
-	animation: add-div .3s linear;
+	animation: add-div 0.3s linear;
 }
 
 .list-item:hover {
-	background-color: hsl(var(--main-bg-color-hs), 16%);
+	background-color: var(--main-bg-color-darker-2);
 }
 
 #top-bar {
-	background-color: hsl(var(--main-bg-color-hs), 15%);
+	background-color: var(--main-bg-color-darker-3);
 	min-height: var(--top-height);
 	line-height: var(--top-height);
 	padding: var(--base-padding);
@@ -65,22 +66,63 @@
 }
 
 .userpage > #userthreads > .thread-container {
-    margin-top: 0;
+	margin-top: 0;
+}
+
+.userpage > #userthreads {
+	justify-self: baseline;
+}
+
+#userthreads {
+	grid-area: userthreads;
+}
+
+#watched-user-threads {
+	grid-area: watched-user-threads;
+}
+
+#search-results {
+	grid-area: search-results;
 }
 
 .content {
 	display: grid;
 	grid-template-columns: 1fr 1fr 1fr;
 	gap: calc(var(--base-margin) * 3);
-	margin: var(--base-margin) calc(3 * var(--base-margin)) var(--base-margin) var(--base-margin);
+	margin: 0 calc(2 * var(--base-margin));
+	grid-template-areas: "userthreads watched-user-threads search-results";
+}
+
+.index {
+	margin: calc(2 * var(--base-margin)) calc(2 * var(--base-margin));
 }
 
 .threadpage {
-    grid-template-columns: repeat(auto-fill, 800px);
+	grid-template-columns: repeat(auto-fill, 800px);
+}
+
+#userpage-header-container {
+	grid-area: userpage-header-container;
+	width: 100%;
+	text-align: center;
+	padding: var(--base-padding);
+	margin: calc(2 * var(--base-margin)) 0 0 0;
+	background-color: var(--main-bg-color-darker-1);
+	border-radius: var(--base-rounding);
+}
+
+#spacer1 {
+	grid-area: spacer1;
+}
+#spacer2 {
+	grid-area: spacer2;
 }
 
 .userpage {
-    grid-template-columns: 600px;
+	grid-template-columns: 15vw 1fr 1fr 15vw;
+	grid-template-areas:
+		"a userpage-header-container userpage-header-container b"
+		"a userthreads userthreads b";
 }
 
 .center-grid {
@@ -101,12 +143,12 @@
 }
 
 .thread-full {
-    padding-top: calc(var(--base-padding) - 0.2em) !important;
+	padding-top: calc(var(--base-padding) - 0.2em) !important;
 }
 
 #reply-thread {
-    margin: calc(-1 * var(--base-padding));
-    margin-top: var(--base-margin);
+	margin: calc(-1 * var(--base-padding));
+	margin-top: var(--base-margin);
 }
 
 .content-block {
@@ -114,9 +156,9 @@
 	padding: var(--base-padding);
 	height: fit-content;
 	border-radius: var(--base-rounding);
-    max-height: inherit;
-    overflow: auto;
-    scrollbar-width: none;
+	max-height: inherit;
+	scrollbar-width: none;
+	margin: calc(-1 * var(--base-padding));
 }
 
 .content-block-form {
@@ -141,7 +183,7 @@
 }
 
 input:hover {
-	background-color: rgba(0,0,0,0.1);
+	background-color: rgba(0, 0, 0, 0.1);
 }
 
 .timeago {

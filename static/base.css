@@ -3,6 +3,10 @@
 	--main-bg-color-l: 20%;
 	--main-bg-color: hsl(var(--main-bg-color-hs), var(--main-bg-color-l));
 
+	--main-bg-color-darker-1: hsl(var(--main-bg-color-hs), 17.5%);
+	--main-bg-color-darker-2: hsl(var(--main-bg-color-hs), 16%);
+	--main-bg-color-darker-3: hsl(var(--main-bg-color-hs), 15%);
+
 	--main-text-color-hs: 225, 15%;
 	--main-text-color-l: 95%;
 	--main-text-color: hsl(var(--main-text-color-hs), var(--main-text-color-l));

@@ -1,5 +1,33 @@
-@media screen and (max-width: 920px) {
-    .content {
-        grid-template-columns: 1fr;
+@media screen and (max-width: 1000px) {
+	.index {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr;
+		grid-template-areas:
+			"userthreads watched-user-threads"
+			"search-results search-results";
+	}
+	.content-block {
+		/*margin-bottom: calc(-2 * var(--base-margin));*/
+	}
+	#search-results {
+		border-bottom: var(--base-margin) var(--main-bg-color) solid;
+	}
+
+    .userpage {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+        "userpage-header-container userpage-header-container"
+        "userthreads userthreads";
     }
+}
+
+@media screen and (max-width: 800px) {
+	.index {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			"userthreads"
+			"watched-user-threads"
+			"search-results";
+	}
 }
