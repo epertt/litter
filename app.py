@@ -13,6 +13,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.secret_key = os.getenv("SECRET_KEY")
 db = SQLAlchemy(app)
 
+# routes (move these to another file)
+
 # index, displays user's own threads as well as threads from anyone they are following
 @app.route("/")
 def index():
@@ -228,7 +230,8 @@ def register_post():
     return redirect("/")
 
 
-# errors
+# errors (move these to another file)
+
 @app.route("/error/400")
 def error_400():
     if user_id := session.get("user_id"):
@@ -256,7 +259,8 @@ def error_404():
         return render_template("404.html.j2"), 404
 
 
-# helper functions
+# helper functions (move these to another file)
+
 def get_user_id():
     return session.get("user_id", 0)
 

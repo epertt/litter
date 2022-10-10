@@ -18,6 +18,5 @@ Login at https://litter-tsoha.herokuapp.com/ with user / resu (passwords for mos
 # todo
 * refactoring as needed (needed a lot)
 * spend more than 5 minutes on security stuff
-* validate input on client side (currently throws errors)
 * maybe user roles (admin/normal user) and post deletion?
 * whatever comes to mind
