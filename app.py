@@ -117,6 +117,7 @@ def thread(id):
             user_id=user_id,
             username=get_username(user_id),
             thread_messages=thread_messages,
+            thread_id=id
         )
     else:
         return redirect("/error/404")
@@ -328,12 +329,14 @@ def get_watched_threads(user_id):
             u.id = w.user_id \
         WHERE \
             watcher_id = :user_id \
+        AND \
+            m.type = :type \
         ORDER BY \
             M.created_at \
         DESC\
         "
 
-    result = db.session.execute(sql, {"user_id": user_id})
+    result = db.session.execute(sql, {"user_id": user_id, "type": "thread"})
     if result.rowcount > 0:
         return result.fetchall()
     else:
@@ -344,7 +347,7 @@ def get_thread_messages(thread_id):
 
     sql = "\
     SELECT \
-        u.id, \
+        u.id AS uid, \
         u.username, \
         m.thread_id, \
         m.message, \

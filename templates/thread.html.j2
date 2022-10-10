@@ -6,6 +6,7 @@
 {% block content %}
 {% if username %}
 <div class="content threadpage center-grid">
+    <div id="header-container">thread #{{thread_id}}</div>
     <div id="userthreads" class="content-block thread-full">
         {% set is_thread = true %}
         <div class="thread-container">

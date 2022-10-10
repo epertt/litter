@@ -5,7 +5,7 @@
 {% endblock %}
 {% block content %}
 <div class="content userpage center-grid">
-    <div id="userpage-header-container">
+    <div id="header-container">
         <div id="userpage-header">{{viewed_username}}'s page</div>
         {% if viewer_id == viewed_id %}
         {% elif is_followed == false %}
@@ -16,6 +16,7 @@
     </div>
     <div id="userthreads" class="content-block">
         <div class="thread-container">
+            <div class="list-item" style="text-align:center;">{{viewed_username}}'s posts</div>
             {% if threads|length %}
             {% for thread in threads %}
             {% include 'threads-partial.html.j2' %}

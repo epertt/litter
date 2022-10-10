@@ -36,11 +36,11 @@ function updateTimes() {
 
 window.addEventListener("load", () => {
 	// remove this if you figure it out in css
-	document.querySelector("#userthreads").children[1].children.length == 0
+	document.querySelector("#userthreads").children[2].children.length == 0
 		? (document.querySelector("#userthreads").style.backgroundColor =
 				"transparent")
 		: () => {};
-	document.querySelector("#watched-user-threads").children[1].children.length ==
+	document.querySelector("#watched-user-threads").children[2].children.length ==
 	0
 		? (document.querySelector("#watched-user-threads").style.backgroundColor =
 				"transparent")
@@ -55,7 +55,7 @@ window.addEventListener("load", () => {
 	const threadForm = document.querySelector("#start-thread").children[0];
 	const threadContainer = document.querySelector("#thread-container");
 
-	async function handleForm(input, url) {
+	async function handleForm(input, url, howmany) {
 		const response = await fetch(url, {
 			method: "POST",
 			body: JSON.stringify(input),
@@ -66,7 +66,7 @@ window.addEventListener("load", () => {
 
 		switch (url) {
 			case "/search/post":
-				updateSearchContainer(response, searchContainer);
+				updateSearchContainer(response, searchContainer, howmany);
 				break;
 			case "/thread/post":
 				console.log("hmm");
@@ -79,7 +79,7 @@ window.addEventListener("load", () => {
 		searchForm.addEventListener("keypress", function (e) {
 			if (e.key === "Enter") {
 				e.preventDefault();
-				handleForm({ search: searchForm.value }, "/search/post");
+				handleForm({ search: searchForm.value }, "/search/post", 0);
 				// clear search form
 				searchForm.value = "";
 				// clear search results
@@ -97,7 +97,7 @@ window.addEventListener("load", () => {
 					threadForm.value = "";
 					return;
 				}
-				handleForm({ message: threadForm.value }, "/thread/post");
+				handleForm({ message: threadForm.value }, "/thread/post", 0);
 				// clear thread form
 				threadForm.value = "";
 			}
@@ -113,14 +113,26 @@ window.addEventListener("load", () => {
 			}
 		});
 	}
+
+	// search on page load to display some recent users
+	handleForm({ search: searchForm.value }, "/search/post", "5");
+	searchContainer.style.transform = "scaleY(1)";
 });
 
-async function updateSearchContainer(response, container) {
+async function updateSearchContainer(response, container, howmany) {
+	let i = 0;
 	const timeout = (ms) => new Promise((r) => setTimeout(r, ms));
+
 	document.querySelector("#search-results").style.backgroundColor =
 		"hsl(var(--main-bg-color-hs), 15%)";
 
 	for (const user of await response.json()) {
+		if (i >= howmany && howmany != 0) {
+			break;
+		}
+
+		console.log(user);
+
 		const newSearchResultElement = document.createElement("div");
 		newSearchResultElement.className = "list-item search-result new-item";
 
@@ -136,10 +148,12 @@ async function updateSearchContainer(response, container) {
 
 		container.appendChild(newSearchResultElement);
 
-		// update "x [time] ago"
-		updateTimes();
+		i++;
 
 		// for style
 		await timeout(50);
 	}
+
+	// update "x [time] ago"
+	updateTimes();
 }

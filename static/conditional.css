@@ -1,23 +1,35 @@
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 9999px) {
+	.index {
+		grid-template-columns: 1fr 700px 700px 700px 1fr;
+		grid-template-areas:
+			"a userthreads watched-user-threads search-results b"
+	}
+}
+
+@media screen and (max-width: calc(2250px)) {
+	.index {
+		grid-template-columns: 1fr 400px 400px 400px 1fr;
+		grid-template-areas:
+			"a userthreads watched-user-threads search-results b"
+	}
+}
+
+@media screen and (max-width: 1400px) {
 	.index {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		grid-template-rows: 1fr;
 		grid-template-areas:
 			"userthreads watched-user-threads"
 			"search-results search-results";
-	}
-	.content-block {
-		/*margin-bottom: calc(-2 * var(--base-margin));*/
 	}
 	#search-results {
 		border-bottom: var(--base-margin) var(--main-bg-color) solid;
 	}
 
-    .userpage {
+    .userpage, .threadpage{
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
-        "userpage-header-container userpage-header-container"
+        "header-container header-container"
         "userthreads userthreads";
     }
 }
