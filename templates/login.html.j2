@@ -1,14 +1,16 @@
 {% extends "base.html.j2" %}
 {% block title %}login{% endblock %}
 {% block head %}
-    {{ super() }}
+{{ super() }}
 {% endblock %}
 {% block content %}
-<div id="login">
-    <form action="/login/post" method="POST">
-        <div><input type="text" name="username" placeholder="username"></div>
-        <div><input type="password" name="password" placeholder="password"></div>
-        <div><input type="submit" value="send" style="display:none;"></div>
-    </form>
+<div class="content loginpage center-grid">
+    <div id="login">
+        <form id="login-form" class="content-block-form" action="/login/post" method="POST">
+            <input type="text" name="username" placeholder="username">
+            <input type="password" name="password" placeholder="password">
+            <input type="submit" value="send" style="display:none;">
+        </form>
+    </div>
 </div>
 {% endblock %}

@@ -113,14 +113,8 @@
 	border-radius: var(--base-rounding);
 }
 
-#spacer1 {
-	grid-area: spacer1;
-}
-#spacer2 {
-	grid-area: spacer2;
-}
-
-.userpage, .threadpage {
+.userpage,
+.threadpage {
 	grid-template-columns: 15vw 1fr 1fr 15vw;
 	grid-template-areas:
 		"a header-container header-container b"
@@ -170,7 +164,7 @@
 	padding: 0;
 	line-height: 2em;
 	background-color: var(--main-bg-color);
-	border: var(--thick-border-width) solid hsl(var(--main-bg-color-hs), 15%);
+	border: var(--thick-border-width) solid var(--main-bg-color-darker-3);
 	border-radius: var(--base-rounding);
 }
 
@@ -182,6 +176,29 @@
 	background-color: var(--main-bg-color);
 	color: var(--main-text-color);
 	border-radius: var(--base-rounding);
+}
+
+.loginpage {
+	grid-template-columns: 1fr 1fr 1fr;
+	grid-template-rows: 1fr 1fr 1fr;
+	grid-template-areas:
+		"a a a"
+		"b login c"
+		"d d d";
+}
+
+#login {
+	display: grid;
+	grid-area: login;
+}
+
+#login-form {
+	border: none;
+}
+
+#login-form > input {
+	border: var(--thick-border-width) solid var(--main-bg-color-darker-3);
+	margin: var(--base-margin);
 }
 
 input:hover {
