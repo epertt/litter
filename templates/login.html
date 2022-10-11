@@ -6,10 +6,13 @@
 {% block content %}
 <div class="content loginpage center-grid">
     <div id="login">
+        {% if created_user != None %}
+        <h5 id="register-login-header" style="width:100%;">created user {{created_user}}</h5>
+        {% endif %}
         <h1 id="register-login-header">login</h1>
         <form id="login-form" class="content-block-form" action="/login/post" method="POST">
-            <input type="text" name="username" placeholder="username">
-            <input type="password" name="password" placeholder="password">
+            <input required type="text" name="username" placeholder="username"{%if created_user != None%}value="{{created_user}}"{%endif%}{%if created_user == None%}autofocus{%endif%}>
+            <input required type="password" name="password" placeholder="password"{%if created_user != None%}autofocus{%endif%}>
             <input type="submit" value="send" style="display:none;">
         </form>
     </div>

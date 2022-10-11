@@ -58,7 +58,6 @@ window.addEventListener("load", () => {
 				updateSearchContainer(response, searchContainer, howmany);
 				break;
 			case "/thread/post":
-				console.log("hmm");
 				break;
 			//updateThreadContainer(response, threadContainer);
 		}

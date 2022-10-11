@@ -5,6 +5,7 @@ from flask import redirect, render_template, request, session, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
+import html
 
 load_dotenv()
 
@@ -175,9 +176,10 @@ def thread_reply():
 
 
 # login, logout
-@app.route("/login")
-def login():
-    return render_template("login.html")
+@app.route("/login", defaults={'created_user': None})
+@app.route("/login/<string:created_user>")
+def login(created_user):
+    return render_template("login.html", created_user=created_user)
 
 
 @app.route("/login/post", methods=["POST"])
@@ -188,7 +190,7 @@ def login_post():
     sql = "SELECT id, password FROM users WHERE username = :username"
     result = db.session.execute(sql, {"username": username}).first()
 
-    if result is None:
+    if result == None:
         return redirect("/error/401")
     else:
         user_id = result[0]
@@ -219,6 +221,12 @@ def register_post():
     password = request.form["password"]
     role = "user"
 
+    # don't allow usernames that need to be escaped
+    username_escaped = html.escape(username)
+    if not username == username_escaped:
+        return redirect("/error/400")
+
+    # don't allow empty usernames
     if len(username) == 0 or len(password) == 0:
         return redirect("/error/400")
 
@@ -228,7 +236,7 @@ def register_post():
     db.session.execute(sql, {"username": username, "password": password, "role": role})
     db.session.commit()
 
-    return redirect("/")
+    return redirect(f"/login/{username}")
 
 
 # errors (move these to another file)
