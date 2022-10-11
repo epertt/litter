@@ -1,0 +1,9 @@
+<div {% if thread.type=='thread' and not is_thread %} onclick="location.href='/thread/{{ thread.thread_id }}';" {% endif %} class="list-item thread{% if thread.type=='thread' and is_thread %} thread-opening{% endif %}{% if thread.type=='reply' %} reply{%endif%}" style="cursor:{% if thread.type=='thread' and is_thread %}auto{% else %}pointer{% endif %};">
+    <div>
+        <a href="/user/{{ thread.uid }}">{{ thread.username }}</a>
+        <span class="timeago" href="/thread/{{ thread.thread_id }}">
+            <time datetime="{{ thread.created_at }}"></time>
+        </span>
+    </div>
+    <span class="message">{{ thread.message }}</span>
+</div>

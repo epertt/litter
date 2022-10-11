@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../static/style.css" />
+    <title>{% block title %}{% endblock %}</title>
+    {% endblock %}
+</head>
+
+<body>
+    <div id="top-bar">
+        {% if username %}
+        <div id="top-menu">
+            <a href="/">index</a> | <a href="/logout">logout</a> | <span>hello {{ username }}</span>
+        </div>
+        {% else %}
+        <div id="top-menu">
+            <a href="/login">login</a> | <a href="/register">register</a>
+        </div>
+        {% endif %}
+    </div>
+        {% block content %}
+        {% endblock %}
+    <div id="footer">
+        {% block footer %}
+        <!--{% if not username %}
+            {% include 'login_please.html' %}
+        {% endif %}-->
+        <script src="../static/script.js"></script>
+        {% endblock %}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}index{% endblock %}
+{% block head %}
+    {{ super() }}
+{% endblock %}
+{% block content %}
+    <h1>error 401</h1>
+    <p class="important">
+      unauthorized (not logged in/not allowed to access page/wrong username or password)
+    </p>
+{% endblock %}

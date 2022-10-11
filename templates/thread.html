@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ username }}{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+{% block content %}
+{% if username %}
+<div class="content threadpage center-grid">
+    <div id="header-container">thread #{{thread_id}}</div>
+    <div id="userthreads" class="content-block thread-full">
+        {% set is_thread = true %}
+        <div class="thread-container">
+            {% for thread in thread_messages %}
+                {% include 'threads-partial.html' %}
+            {% endfor %}
+        </div>
+        <form id="reply-thread" class="content-block-form" action="/thread/reply" method="POST">
+            <input type="text" name="reply" placeholder="reply to thread">
+            <input type="hidden" name="thread_id" value="{{ thread_messages[0].thread_id }}" required readonly>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

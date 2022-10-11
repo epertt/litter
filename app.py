@@ -5,7 +5,6 @@ from flask import redirect, render_template, request, session, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
-from html_sanitizer import Sanitizer
 
 load_dotenv()
 
@@ -219,11 +218,6 @@ def register_post():
     username = request.form["username"]
     password = request.form["password"]
     role = "user"
-
-    sanitizer = Sanitizer()
-    print(username)
-    print(sanitizer.sanitize(username))
-    return "no"
 
     if len(username) == 0 or len(password) == 0:
         return redirect("/error/400")
