@@ -1,6 +1,7 @@
 from flask import session
 from config import db
 
+
 def get_user_id():
     return session.get("user_id", 0)
 
@@ -14,6 +15,7 @@ def get_username(user_id):
         return False
 
 
+# the thread functions would ideally be a single function
 def get_user_threads(user_id):
 
     sql = "\

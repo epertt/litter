@@ -1,9 +1,12 @@
-from config import *
+from config import app, db
 from helpers import *
-from flask import redirect, render_template, request, session, jsonify, abort
+from flask import redirect, render_template, request, session, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
-import json
-import html
+import html, json
+
+# think about this
+#@app.before_request
+#def before_request():
 
 # index, displays user's own threads as well as threads from anyone they are following
 @app.route("/")
@@ -23,9 +26,8 @@ def index():
 # user pages
 @app.route("/user/<int:id>")
 def userpage(id):
-    if get_user_id():
+    if user_id := get_user_id():
         # get id of user viewing page, then use that to find out if user is followed
-        user_id = get_user_id()
         followed = is_followed(id, user_id)
 
         # get rest of relevant page info
@@ -43,7 +45,7 @@ def userpage(id):
         )
     else:
         session["error"] = "you need to log in to view user pages."
-        return redirect("/error/404")
+        return redirect("/error/401")
 
 
 # follow, unfollow -- redo this
