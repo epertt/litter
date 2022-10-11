@@ -18,7 +18,7 @@ var getRelativeTime = (d1, d2 = new Date()) => {
 			return rtf.format(Math.round(elapsed / units[u]), u);
 };
 
-times = document.getElementsByTagName("time");
+var times = document.getElementsByTagName("time");
 skipIntervalWait(updateTimes, 10000);
 
 function skipIntervalWait(updateTimes, t) {
@@ -122,13 +122,14 @@ async function updateSearchContainer(response, container, howmany) {
 
 		console.log(user);
 
+		let parser = new DOMParser();
+
 		const newSearchResultElement = document.createElement("a");
 		newSearchResultElement.href = "/user/" + user.id;
 		newSearchResultElement.className = "list-item search-result new-item";
 
 		const newSearchResultElementUser = document.createElement("span");
-		//newSearchResultElementUser.href = "/user/" + user.id;
-		newSearchResultElementUser.innerHTML = user.username;
+		newSearchResultElementUser.textContent = user.username;
 		newSearchResultElement.appendChild(newSearchResultElementUser);
 
 		const newSearchResultElementCreatedAt = document.createElement("time");

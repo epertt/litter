@@ -5,6 +5,7 @@ from flask import redirect, render_template, request, session, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
+from html_sanitizer import Sanitizer
 
 load_dotenv()
 
@@ -22,8 +23,9 @@ def index():
         threads = get_user_threads(user_id)
         username = get_username(user_id)
         watched = get_watched_threads(user_id)
+        
         return render_template(
-            "index.html.j2", threads=threads, username=username, watched=watched
+            "index.html", threads=threads, username=username, watched=watched
         )
     else:
         return redirect("/login")
@@ -51,7 +53,7 @@ def userpage(id):
         username = get_username(user_id)
 
         return render_template(
-            "userpage.html.j2",
+            "userpage.html",
             threads=threads,
             username=username,
             viewed_username=get_username(id),
@@ -115,7 +117,7 @@ def thread(id):
     if thread_messages := get_thread_messages(id):
         user_id = get_user_id()
         return render_template(
-            "thread.html.j2",
+            "thread.html",
             user_id=user_id,
             username=get_username(user_id),
             thread_messages=thread_messages,
@@ -176,7 +178,7 @@ def thread_reply():
 # login, logout
 @app.route("/login")
 def login():
-    return render_template("login.html.j2")
+    return render_template("login.html")
 
 
 @app.route("/login/post", methods=["POST"])
@@ -203,13 +205,13 @@ def login_post():
 @app.route("/logout")
 def logout():
     del session["user_id"]
-    return render_template("logout.html.j2")
+    return render_template("logout.html")
 
 
 # register
 @app.route("/register")
 def register():
-    return render_template("register.html.j2")
+    return render_template("register.html")
 
 
 @app.route("/register/post", methods=["POST"])
@@ -217,6 +219,11 @@ def register_post():
     username = request.form["username"]
     password = request.form["password"]
     role = "user"
+
+    sanitizer = Sanitizer()
+    print(username)
+    print(sanitizer.sanitize(username))
+    return "no"
 
     if len(username) == 0 or len(password) == 0:
         return redirect("/error/400")
@@ -236,27 +243,27 @@ def register_post():
 def error_400():
     if user_id := session.get("user_id"):
         username = get_username(user_id)
-        return render_template("400.html.j2", username=username), 400
+        return render_template("400.html", username=username), 400
     else:
-        return render_template("400.html.j2"), 400
+        return render_template("400.html"), 400
 
 
 @app.route("/error/401")
 def error_401():
     if user_id := session.get("user_id"):
         username = get_username(user_id)
-        return render_template("401.html.j2", username=username), 401
+        return render_template("401.html", username=username), 401
     else:
-        return render_template("401.html.j2"), 401
+        return render_template("401.html"), 401
 
 
 @app.route("/error/404")
 def error_404():
     if user_id := session.get("user_id"):
         username = get_username(user_id)
-        return render_template("404.html.j2", username=username), 404
+        return render_template("404.html", username=username), 404
     else:
-        return render_template("404.html.j2"), 404
+        return render_template("404.html"), 404
 
 
 # helper functions (move these to another file)
