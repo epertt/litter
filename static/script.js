@@ -119,8 +119,6 @@ async function updateSearchContainer(response, container, howmany) {
 			break;
 		}
 
-		console.log(user);
-
 		let parser = new DOMParser();
 
 		const newSearchResultElement = document.createElement("a");

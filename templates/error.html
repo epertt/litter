@@ -4,8 +4,9 @@
     {{ super() }}
 {% endblock %}
 {% block content %}
-    <h1>error 400</h1>
+    <h1>error {{errorcode}}</h1>
     <p class="important">
-      bad request (you probably did something that wasn't intended to work?)
+      {{errortext}}
+      <p>more info: {{moreinfo}}</p>
     </p>
 {% endblock %}

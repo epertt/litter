@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from flask import Flask
 from flask import redirect, render_template, request, session, jsonify, abort
@@ -23,7 +24,7 @@ def index():
         threads = get_user_threads(user_id)
         username = get_username(user_id)
         watched = get_watched_threads(user_id)
-        
+
         return render_template(
             "index.html", threads=threads, username=username, watched=watched
         )
@@ -31,19 +32,10 @@ def index():
         return redirect("/login")
 
 
-# redirect to user's own page as seen by other users (for easier sharing)
-@app.route("/user/me")
-def ownpage():
-    if user_id := session.get("user_id"):
-        return redirect(f"/user/{user_id}")
-    else:
-        return redirect("/error/400")
-
-
 # user pages
 @app.route("/user/<int:id>")
 def userpage(id):
-    if get_username(id):
+    if get_user_id():
         # get id of user viewing page, then use that to find out if user is followed
         user_id = get_user_id()
         followed = is_followed(id, user_id)
@@ -62,6 +54,7 @@ def userpage(id):
             is_followed=followed,
         )
     else:
+        session["error"] = "you need to log in to view user pages."
         return redirect("/error/404")
 
 
@@ -121,7 +114,7 @@ def thread(id):
             user_id=user_id,
             username=get_username(user_id),
             thread_messages=thread_messages,
-            thread_id=id
+            thread_id=id,
         )
     else:
         return redirect("/error/404")
@@ -176,7 +169,7 @@ def thread_reply():
 
 
 # login, logout
-@app.route("/login", defaults={'created_user': None})
+@app.route("/login", defaults={"created_user": None})
 @app.route("/login/<string:created_user>")
 def login(created_user):
     return render_template("login.html", created_user=created_user)
@@ -224,6 +217,9 @@ def register_post():
     # don't allow usernames that need to be escaped
     username_escaped = html.escape(username)
     if not username == username_escaped:
+        session[
+            "error"
+        ] = "username contained blacklisted characters. try an username consisting of letters, numbers, dashes or underscores."
         return redirect("/error/400")
 
     # don't allow empty usernames
@@ -240,36 +236,28 @@ def register_post():
 
 
 # errors (move these to another file)
+@app.route("/error/<int:errorcode>")
+def error(errorcode):
+    match errorcode:
+        case 400:
+            errortext = "bad request"
+        case 401:
+            errortext = "unauthorized (not logged in/not allowed to access page/wrong username or password)"
+        case 404:
+            errortext = "user or page doesn't exist"
 
-@app.route("/error/400")
-def error_400():
-    if user_id := session.get("user_id"):
-        username = get_username(user_id)
-        return render_template("400.html", username=username), 400
-    else:
-        return render_template("400.html"), 400
-
-
-@app.route("/error/401")
-def error_401():
-    if user_id := session.get("user_id"):
-        username = get_username(user_id)
-        return render_template("401.html", username=username), 401
-    else:
-        return render_template("401.html"), 401
-
-
-@app.route("/error/404")
-def error_404():
-    if user_id := session.get("user_id"):
-        username = get_username(user_id)
-        return render_template("404.html", username=username), 404
-    else:
-        return render_template("404.html"), 404
+    return (
+        render_template(
+            "error.html",
+            moreinfo=session.pop("error", None),
+            errorcode=errorcode,
+            errortext=errortext,
+        ),
+        errorcode,
+    )
 
 
 # helper functions (move these to another file)
-
 def get_user_id():
     return session.get("user_id", 0)
 
