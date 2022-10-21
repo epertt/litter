@@ -1,8 +1,7 @@
-from config import app, db, secrets
+from config import app, db
 from helpers import *
 from flask import redirect, render_template, request, session, jsonify
-from werkzeug.security import check_password_hash, generate_password_hash
-import html, json
+import json
 
 ## think about this
 # @app.before_request
@@ -48,36 +47,22 @@ def userpage(id):
         return redirect("/error/401")
 
 
-# follow, unfollow ## -- redo this
-@app.route("/follow/<int:id>")
+# follow if not following, unfollow otherwise
+@app.route("/follow/<int:id>", methods=["POST"])
 def follow(id):
-    if user_id := session.get("user_id") and csrf_check(request.form["csrf_token"]):
+    if user_id := authenticate(request.form["csrf_token"]):
         if id == user_id:
             return redirect("/error/400")
         else:
-            follow_id = id
-            sql = "INSERT INTO watchers (user_id, watcher_id) VALUES (:follow_id, :user_id)"
-            db.session.execute(sql, {"follow_id": follow_id, "user_id": user_id})
-            db.session.commit()
-            return redirect("/")
+            if "follow" in request.form:
+                follow_user(id, user_id)
+            elif "unfollow" in request.form:
+                unfollow_user(id, user_id)
+            else:
+                return redirect("/error/400")
+            return redirect(f"/user/{id}")
     else:
         return redirect("/error/400")
-
-
-@app.route("/unfollow/<int:id>")
-def unfollow(id):
-    if user_id := session.get("user_id") and csrf_check(request.form["csrf_token"]):
-        if id == user_id:
-            return redirect("/error/400")
-        else:
-            follow_id = id
-            sql = "DELETE FROM watchers WHERE user_id = :follow_id AND watcher_id = :user_id"
-            db.session.execute(sql, {"follow_id": follow_id, "user_id": user_id})
-            db.session.commit()
-            return redirect("/")
-    else:
-        return redirect("/error/400")
-
 
 # search
 @app.route("/search/post", methods=["POST"])
@@ -112,32 +97,11 @@ def thread(id):
 
 @app.route("/thread/post", methods=["POST"])
 def message_post():
-    if user_id := session.get("user_id") and csrf_check(request.json["csrf_token"]):
-        user_id = get_user_id()
+    if user_id := authenticate(request.json["csrf_token"]):
         username = get_username(user_id)
         message = request.json["message"]
 
-        if len(message) == 0 or len(message) > 500:
-            session["error"] = "message was too long (more than 500 characters) or too short (less than 1 character)"
-            return redirect("/error/400")
-
-        sql = "INSERT INTO threads DEFAULT VALUES RETURNING id"
-        result = db.session.execute(sql)
-        db.session.commit()
-
-        thread_id = result.first()[0]
-
-        sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
-        db.session.execute(
-            sql,
-            {
-                "thread_id": thread_id,
-                "user_id": user_id,
-                "message": message,
-                "type": "thread",
-            },
-        )
-        db.session.commit()
+        post_thread_message(user_id, message)
         return redirect("/")
     else:
         return redirect("/error/401")
@@ -146,27 +110,11 @@ def message_post():
 ## consider another approach to getting thread_id
 @app.route("/thread/reply", methods=["POST"])
 def thread_reply():
-    if user_id := session.get("user_id") and csrf_check(request.form["csrf_token"]):
-        user_id = get_user_id()
+    if user_id := authenticate(request.form["csrf_token"]):
         reply = request.form["reply"]
         thread_id = request.form["thread_id"]
 
-        if len(message) == 0 or len(message) > 500:
-            session["error"] = "message was too long (more than 500 characters) or too short (less than 1 character)"
-            return redirect("/error/400")
-
-        sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
-        db.session.execute(
-            sql,
-            {
-                "thread_id": thread_id,
-                "user_id": user_id,
-                "message": reply,
-                "type": "reply",
-            },
-        )
-        db.session.commit()
-
+        post_thread_reply(user_id, reply, thread_id)
         return redirect(f"/thread/{thread_id}")
     else:
         return "/error/401"
@@ -183,22 +131,7 @@ def login(created_user):
 def login_post():
     username = request.form["username"]
     password = request.form["password"]
-
-    sql = "SELECT id, password FROM users WHERE username = :username"
-    result = db.session.execute(sql, {"username": username}).first()
-
-    if result == None:
-        return redirect("/error/401")
-    else:
-        user_id = result[0]
-        password_hash = result[1]
-
-        if check_password_hash(password_hash, password):
-            session["user_id"] = user_id
-            session["csrf_token"] = secrets.token_hex(16)
-            return redirect("/")
-        else:
-            return redirect("/error/401")
+    return login_user(username, password)
 
 
 @app.route("/logout")
@@ -220,23 +153,7 @@ def register_post():
     password = request.form["password"]
     role = "user"
 
-    # don't allow usernames that need to be escaped
-    username_escaped = html.escape(username)
-    if not username == username_escaped:
-        session[
-            "error"
-        ] = "username contained blacklisted characters. try a username consisting of letters, numbers, dashes or underscores."
-        return redirect("/error/400")
-
-    # don't allow empty usernames
-    if len(username) == 0 or len(password) == 0:
-        return redirect("/error/400")
-
-    password = generate_password_hash(password)
-
-    sql = "INSERT INTO users (username, password, role) VALUES (:username, :password, :role)"
-    db.session.execute(sql, {"username": username, "password": password, "role": role})
-    db.session.commit()
+    register_user(username, password, role)
 
     return redirect(f"/login/{username}")
 

@@ -8,11 +8,19 @@
     <div id="header-container">
         <div id="userpage-header">{{viewed_username}}'s page</div>
         {% if viewer_id == viewed_id %}
-        {% elif is_followed == false %}
-        <div id="follow-unfollow"><a href="/follow/{{ viewed_id }}">follow {{ viewed_username }}</a></div>
         {% else %}
-        <div id="follow-unfollow"><a href="/unfollow/{{ viewed_id }}">unfollow {{ viewed_username }}</a></div>
+        <div id="follow-unfollow">
+            <form action="/follow/{{ viewed_id }}" method="POST">
+                {% if is_followed == false %}
+                <input type="submit" name="follow" value="follow {{ viewed_username }}" />
+                {% else %}
+                <input type="submit" name="unfollow" value="unfollow {{ viewed_username }}" />
+                {% endif %}
+		        <input id="csrf_token" type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
+            </form>
+        </div>
         {% endif %}
+        
     </div>
     <div id="userthreads" class="content-block">
         <div class="thread-container">

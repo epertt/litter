@@ -1,5 +1,7 @@
-from flask import session
-from config import db
+from flask import session, redirect
+from config import db, secrets
+from werkzeug.security import check_password_hash, generate_password_hash
+import html
 
 
 def get_user_id():
@@ -137,8 +139,118 @@ def is_followed(user_id, watcher_id):
     else:
         return True
 
+
 def csrf_check(token):
     if session.get("csrf_token") == token:
         return True
+    else:
+        return False
+
+
+def follow_user(follow_id, user_id):
+    sql = "INSERT INTO watchers (user_id, watcher_id) VALUES (:follow_id, :user_id)"
+    db.session.execute(sql, {"follow_id": follow_id, "user_id": user_id})
+    db.session.commit()
+
+
+def unfollow_user(follow_id, user_id):
+    sql = "DELETE FROM watchers WHERE user_id = :follow_id AND watcher_id = :user_id"
+    db.session.execute(sql, {"follow_id": follow_id, "user_id": user_id})
+    db.session.commit()
+
+
+def post_thread_message(user_id, message):
+    if len(message) == 0 or len(message) > 500:
+        session[
+            "error"
+        ] = "message was too long (more than 500 characters) or too short (less than 1 character)"
+        return redirect("/error/400")
+
+    sql = "INSERT INTO threads DEFAULT VALUES RETURNING id"
+    result = db.session.execute(sql)
+    db.session.commit()
+
+    thread_id = result.first()[0]
+
+    sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
+    db.session.execute(
+        sql,
+        {
+            "thread_id": thread_id,
+            "user_id": user_id,
+            "message": message,
+            "type": "thread",
+        },
+    )
+    db.session.commit()
+
+
+def post_thread_reply(user_id, reply, thread_id):
+    if len(reply) == 0 or len(reply) > 500:
+        session[
+            "error"
+        ] = "message was too long (more than 500 characters) or too short (less than 1 character)"
+        return redirect("/error/400")
+
+    sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
+    db.session.execute(
+        sql,
+        {
+            "thread_id": thread_id,
+            "user_id": user_id,
+            "message": reply,
+            "type": "reply",
+        },
+    )
+    db.session.commit()
+
+
+def register_user(username, password, role):
+    # don't allow usernames that need to be escaped
+    username_escaped = html.escape(username)
+    if not username == username_escaped:
+        session[
+            "error"
+        ] = "username contained blacklisted characters. try a username consisting of letters, numbers, dashes or underscores."
+        return redirect("/error/400")
+
+    # don't allow empty usernames and put at least some limits on username/password length
+    if (
+        len(username) == 0
+        or len(password) == 0
+        or len(username) > 30
+        or len(password) > 500
+    ):
+        session["error"] = "username or password too long or too short."
+        return redirect("/error/400")
+
+    password = generate_password_hash(password)
+
+    sql = "INSERT INTO users (username, password, role) VALUES (:username, :password, :role)"
+    db.session.execute(sql, {"username": username, "password": password, "role": role})
+    db.session.commit()
+
+
+def login_user(username, password):
+    sql = "SELECT id, password FROM users WHERE username = :username"
+    result = db.session.execute(sql, {"username": username}).first()
+
+    if result == None:
+        session["error"] = "wrong username or password."
+        return redirect("/error/401")
+    else:
+        user_id = result[0]
+        password_hash = result[1]
+
+        if check_password_hash(password_hash, password):
+            session["user_id"] = user_id
+            session["csrf_token"] = secrets.token_hex(16)
+            return redirect("/")
+        else:
+            return redirect("/error/401")
+
+def authenticate(token):
+    if csrf_check(token):
+        return get_user_id()
     else:
         return False
