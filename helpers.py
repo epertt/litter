@@ -136,3 +136,9 @@ def is_followed(user_id, watcher_id):
         return False
     else:
         return True
+
+def csrf_check(token):
+    if session.get("csrf_token") == token:
+        return True
+    else:
+        return False

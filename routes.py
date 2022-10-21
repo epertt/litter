@@ -1,12 +1,12 @@
-from config import app, db
+from config import app, db, secrets
 from helpers import *
 from flask import redirect, render_template, request, session, jsonify
 from werkzeug.security import check_password_hash, generate_password_hash
 import html, json
 
-# think about this
-#@app.before_request
-#def before_request():
+## think about this
+# @app.before_request
+# def before_request():
 
 # index, displays user's own threads as well as threads from anyone they are following
 @app.route("/")
@@ -48,10 +48,10 @@ def userpage(id):
         return redirect("/error/401")
 
 
-# follow, unfollow -- redo this
+# follow, unfollow ## -- redo this
 @app.route("/follow/<int:id>")
 def follow(id):
-    if user_id := session.get("user_id"):
+    if user_id := session.get("user_id") and csrf_check(request.form["csrf_token"]):
         if id == user_id:
             return redirect("/error/400")
         else:
@@ -66,7 +66,7 @@ def follow(id):
 
 @app.route("/unfollow/<int:id>")
 def unfollow(id):
-    if user_id := session.get("user_id"):
+    if user_id := session.get("user_id") and csrf_check(request.form["csrf_token"]):
         if id == user_id:
             return redirect("/error/400")
         else:
@@ -112,50 +112,64 @@ def thread(id):
 
 @app.route("/thread/post", methods=["POST"])
 def message_post():
-    user_id = get_user_id()
-    username = get_username(user_id)
-    message = request.json["message"]
+    if user_id := session.get("user_id") and csrf_check(request.json["csrf_token"]):
+        user_id = get_user_id()
+        username = get_username(user_id)
+        message = request.json["message"]
 
-    if len(message) == 0:
+        if len(message) == 0 or len(message) > 500:
+            session["error"] = "message was too long (more than 500 characters) or too short (less than 1 character)"
+            return redirect("/error/400")
+
+        sql = "INSERT INTO threads DEFAULT VALUES RETURNING id"
+        result = db.session.execute(sql)
+        db.session.commit()
+
+        thread_id = result.first()[0]
+
+        sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
+        db.session.execute(
+            sql,
+            {
+                "thread_id": thread_id,
+                "user_id": user_id,
+                "message": message,
+                "type": "thread",
+            },
+        )
+        db.session.commit()
+        return redirect("/")
+    else:
         return redirect("/error/401")
 
-    sql = "INSERT INTO threads DEFAULT VALUES RETURNING id"
-    result = db.session.execute(sql)
-    db.session.commit()
 
-    thread_id = result.first()[0]
-
-    sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
-    db.session.execute(
-        sql,
-        {
-            "thread_id": thread_id,
-            "user_id": user_id,
-            "message": message,
-            "type": "thread",
-        },
-    )
-    db.session.commit()
-    return redirect("/")
-
-
+## consider another approach to getting thread_id
 @app.route("/thread/reply", methods=["POST"])
 def thread_reply():
-    user_id = get_user_id()
-    reply = request.form["reply"]
-    thread_id = request.form["thread_id"]
+    if user_id := session.get("user_id") and csrf_check(request.form["csrf_token"]):
+        user_id = get_user_id()
+        reply = request.form["reply"]
+        thread_id = request.form["thread_id"]
 
-    if len(reply) == 0:
-        return redirect("/error/401")
+        if len(message) == 0 or len(message) > 500:
+            session["error"] = "message was too long (more than 500 characters) or too short (less than 1 character)"
+            return redirect("/error/400")
 
-    sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
-    db.session.execute(
-        sql,
-        {"thread_id": thread_id, "user_id": user_id, "message": reply, "type": "reply"},
-    )
-    db.session.commit()
+        sql = "INSERT INTO messages (thread_id, user_id, message, type) VALUES (:thread_id, :user_id, :message, :type)"
+        db.session.execute(
+            sql,
+            {
+                "thread_id": thread_id,
+                "user_id": user_id,
+                "message": reply,
+                "type": "reply",
+            },
+        )
+        db.session.commit()
 
-    return redirect(f"/thread/{thread_id}")
+        return redirect(f"/thread/{thread_id}")
+    else:
+        return "/error/401"
 
 
 # login, logout
@@ -181,6 +195,7 @@ def login_post():
 
         if check_password_hash(password_hash, password):
             session["user_id"] = user_id
+            session["csrf_token"] = secrets.token_hex(16)
             return redirect("/")
         else:
             return redirect("/error/401")
@@ -189,6 +204,7 @@ def login_post():
 @app.route("/logout")
 def logout():
     del session["user_id"]
+    del session["csrf_token"]
     return render_template("logout.html")
 
 
@@ -209,7 +225,7 @@ def register_post():
     if not username == username_escaped:
         session[
             "error"
-        ] = "username contained blacklisted characters. try an username consisting of letters, numbers, dashes or underscores."
+        ] = "username contained blacklisted characters. try a username consisting of letters, numbers, dashes or underscores."
         return redirect("/error/400")
 
     # don't allow empty usernames
@@ -225,7 +241,7 @@ def register_post():
     return redirect(f"/login/{username}")
 
 
-# errors (move these to another file?)
+# errors ## (move these to another file?)
 @app.route("/error/<int:errorcode>")
 def error(errorcode):
     match errorcode:
@@ -233,6 +249,8 @@ def error(errorcode):
             errortext = "bad request"
         case 401:
             errortext = "unauthorized (not logged in/not allowed to access page/wrong username or password)"
+        case 403:
+            errortext = "forbidden"
         case 404:
             errortext = "user or page doesn't exist"
 

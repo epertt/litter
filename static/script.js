@@ -43,6 +43,7 @@ window.addEventListener("load", () => {
 
 	const threadForm = document.querySelector("#start-thread").children[0];
 	const threadContainer = document.querySelector("#thread-container");
+	const threadCSRFcheck = document.querySelector("#csrf_token");
 
 	async function handleForm(input, url, howmany) {
 		const response = await fetch(url, {
@@ -58,8 +59,8 @@ window.addEventListener("load", () => {
 				updateSearchContainer(response, searchContainer, howmany);
 				break;
 			case "/thread/post":
+				updateThreadContainer(response, threadContainer);
 				break;
-			//updateThreadContainer(response, threadContainer);
 		}
 	}
 
@@ -67,7 +68,7 @@ window.addEventListener("load", () => {
 		searchForm.addEventListener("keypress", function (e) {
 			if (e.key === "Enter") {
 				e.preventDefault();
-				handleForm({ search: searchForm.value }, "/search/post", 0);
+				handleForm({ search: searchForm.value}, "/search/post", 0);
 				// clear search form
 				searchForm.value = "";
 				// clear search results
@@ -85,7 +86,7 @@ window.addEventListener("load", () => {
 					threadForm.value = "";
 					return;
 				}
-				handleForm({ message: threadForm.value }, "/thread/post", 0);
+				handleForm({ message: threadForm.value, csrf_token: threadCSRFcheck.value }, "/thread/post", 0);
 				// clear thread form
 				threadForm.value = "";
 			}
@@ -144,4 +145,9 @@ async function updateSearchContainer(response, container, howmany) {
 
 	// update "x [time] ago"
 	updateTimes();
+}
+
+function updateThreadContainer(response, container) {
+	// think about a better solution than reloading the page
+	location.reload();
 }

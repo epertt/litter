@@ -17,6 +17,7 @@
         <form id="reply-thread" class="content-block-form" action="/thread/reply" method="POST">
             <input type="text" name="reply" placeholder="reply to thread">
             <input type="hidden" name="thread_id" value="{{ thread_messages[0].thread_id }}" required readonly>
+            <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}">
         </form>
     </div>
 </div>
