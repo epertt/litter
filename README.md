@@ -16,7 +16,3 @@ You can register and post messages, follow users and reply to posts.
 Login at https://litter-tsoha.herokuapp.com/ with user / resu (passwords for most other accounts are also the username backwards)
 
 # todo
-* refactoring as needed (needed a lot)
-* spend more than 5 minutes on security stuff
-* maybe user roles (admin/normal user) and post deletion?
-* whatever comes to mind
